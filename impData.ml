@@ -10,9 +10,9 @@ module type Show = sig
 end
 
 module Show = struct
-  let to_string (implicit M : Show) = M.to_string
-  let buffer_add (implicit M : Show) = M.buffer_add
-  let pp_print (implicit M : Show) = M.pp_print
+  let to_string {M : Show} = M.to_string
+  let buffer_add {M : Show} = M.buffer_add
+  let pp_print {M : Show} = M.pp_print
 end
 
 module type Eq = sig
@@ -21,7 +21,7 @@ module type Eq = sig
 end
 
 module Eq = struct
-  let ( = ) (implicit M : Eq) = M.(=)
+  let ( = ) {M : Eq} = M.(=)
 end
 
 module type Ord = sig
@@ -30,13 +30,13 @@ module type Ord = sig
 end
 
 module Ord = struct
-  let ( =  ) (implicit M : Ord) a b = M.compare a b =  0
-  let ( <> ) (implicit M : Ord) a b = M.compare a b <> 0
-  let ( <  ) (implicit M : Ord) a b = M.compare a b <  0
-  let ( <= ) (implicit M : Ord) a b = M.compare a b <= 0
-  let ( >  ) (implicit M : Ord) a b = M.compare a b >  0
-  let ( >= ) (implicit M : Ord) a b = M.compare a b >= 0
-  let compare (implicit M : Ord) = M.compare
+  let ( =  ) {M : Ord} a b = M.compare a b =  0
+  let ( <> ) {M : Ord} a b = M.compare a b <> 0
+  let ( <  ) {M : Ord} a b = M.compare a b <  0
+  let ( <= ) {M : Ord} a b = M.compare a b <= 0
+  let ( >  ) {M : Ord} a b = M.compare a b >  0
+  let ( >= ) {M : Ord} a b = M.compare a b >= 0
+  let compare {M : Ord} = M.compare
 end
 
 module type Num = sig
@@ -52,14 +52,14 @@ module type Num = sig
 end
 
 module Num = struct
-  let zero   (implicit M : Num) () = M.zero
-  let one    (implicit M : Num) () = M.one
-  let of_int (implicit M : Num) = M.of_int
-  let ( + )  (implicit M : Num) = M.( + )
-  let ( - )  (implicit M : Num) = M.( - )
-  let ( * )  (implicit M : Num) = M.( * )
-  let ( / )  (implicit M : Num) = M.( / )
-  let (~- )  (implicit M : Num) = M.(~- )
+  let zero   {M : Num} () = M.zero
+  let one    {M : Num} () = M.one
+  let of_int {M : Num} = M.of_int
+  let ( + )  {M : Num} = M.( + )
+  let ( - )  {M : Num} = M.( - )
+  let ( * )  {M : Num} = M.( * )
+  let ( / )  {M : Num} = M.( / )
+  let (~- )  {M : Num} = M.(~- )
 end
 
 module type Bounded = sig
@@ -68,7 +68,7 @@ module type Bounded = sig
 end
 
 module Bounded = struct
-  let bounds (implicit M : Bounded) () = M.bounds
+  let bounds {M : Bounded} () = M.bounds
 end
 
 module type Enum = sig
@@ -78,29 +78,29 @@ module type Enum = sig
 end
 
 module Enum = struct
-  let succ (implicit M : Enum) x = M.succ
-  let pred (implicit M : Enum) x = M.pred
+  let succ {M : Enum} x = M.succ
+  let pred {M : Enum} x = M.pred
 
   let rec fold_enum_to
-    : (implicit M : Enum) -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
-    = fun (implicit M : Enum) a b f acc ->
+    : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
+    = fun {M : Enum} a b f acc ->
     if M.compare a b < 0 then
       fold_enum_to (M.succ a) b f (f a acc)
     else
       acc
 
   let rec fold_enum_downto
-    : (implicit M : Enum) -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
-    = fun (implicit M : Enum) a b f acc ->
+    : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
+    = fun {M : Enum} a b f acc ->
     if M.compare b a < 0 then
       fold_enum_downto (M.pred a) b f (f a acc)
     else
       acc
 
-  let list_enum_to (implicit M : Enum) (a : M.t) b =
+  let list_enum_to {M : Enum} (a : M.t) b =
     List.rev (fold_enum_to a b (fun x acc -> x :: acc) [])
 
-  let list_enum_downto (implicit M : Enum) (a : M.t) b =
+  let list_enum_downto {M : Enum} (a : M.t) b =
     List.rev (fold_enum_downto a b (fun x acc -> x :: acc) [])
 end
 
@@ -111,8 +111,8 @@ module type Monoid = sig
 end
 
 module Monoid = struct
-  let empty (implicit M : Monoid) () = M.empty
-  let append (implicit M : Monoid) = M.append
+  let empty {M : Monoid} () = M.empty
+  let append {M : Monoid} = M.append
 end
 
 (* Instances *)

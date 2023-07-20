@@ -7,7 +7,7 @@ module type Manageable = sig
   val release : 'a lock -> unit
 end
 
-let with_resource (implicit M : Manageable) r f =
+let with_resource {M : Manageable} r f =
   let lock, value = M.acquire r in
   try
     let result = f value in

@@ -11,14 +11,14 @@ module type Num = sig
 end;;
 
 module Num = struct
-  let ( + ) (implicit M : Num) = M.( + )
-  let ( - ) (implicit M : Num) = M.( - )
-  let ( * ) (implicit M : Num) = M.( * )
-  let ( / ) (implicit M : Num) = M.( / )
-  let (~- ) (implicit M : Num) = M.(~- )
-  let zero  (implicit M : Num) () = M.zero
-  let one   (implicit M : Num) () = M.one
-  let (~~)  (implicit M : Num) = M.of_int
+  let ( + ) {M : Num} = M.( + )
+  let ( - ) {M : Num} = M.( - )
+  let ( * ) {M : Num} = M.( * )
+  let ( / ) {M : Num} = M.( / )
+  let (~- ) {M : Num} = M.(~- )
+  let zero  {M : Num} () = M.zero
+  let one   {M : Num} () = M.one
+  let (~~)  {M : Num} = M.of_int
 end;;
 
 implicit module Int = struct
@@ -47,6 +47,6 @@ let x = 1 + one() + one();;
 
 let y = 2.5 + 6.0;;
 
-let sq (implicit N : Num) (x : N.t) (y : N.t) = x * x;;
+let sq {N : Num} (x : N.t) (y : N.t) = x * x;;
 
 let z = sq 6.0;;

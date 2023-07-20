@@ -1,48 +1,48 @@
-(* Funtor, Idiom and Monad module types *)
+(* Funtor, Applicative and Monad module types *)
 module type Functor = sig
   type 'a t
   val fmap : ('a -> 'b) -> 'a t -> 'b t
 end;;
 
-let fmap (implicit F : Functor) = F.fmap;;
+let fmap {F : Functor} = F.fmap;;
 
-module type Idiom = sig
+module type Applicative = sig
   include Functor
   val return : 'a -> 'a t
   val apply : ('a -> 'b) t -> 'a t -> 'b t
 end;;
 
-let return (implicit M : Monad) = M.return;;
-let apply (implicit M : Idiom) = M.apply;;
+let return {M : Applicative} = M.return;;
+let apply {M : Applicative} = M.apply;;
 
 module type Monad = sig
-  include Idiom
+  include Applicative
   val bind : 'a t -> ('a -> 'b t) -> 'b t
 end;;
 
-let bind (implicit M : Monad) = M.bind;;
+let bind {M : Monad} = M.bind;;
 
 (* Convenience functions *)
 
-let pure (implicit M : Monad) = M.return;;
-let (>>=) (implicit M : Monad) = M.bind;;
+let pure {M : Monad} = M.return;;
+let (>>=) {M : Monad} = M.bind;;
 
 (* Define polymorphic monad functions *)
 
-let join (implicit M : Monad) (x : 'a M.t M.t) =
+let join {M : Monad} (x : 'a M.t M.t) =
   M.bind x (fun x -> x);;
 
-let (>>|) (implicit M : Monad) (m : 'a M.t) (k : 'a -> 'b) =
+let (>>|) {M : Monad} (m : 'a M.t) (k : 'a -> 'b) =
   bind m (fun x -> return (k x));;
 
-let sequence (implicit M : Monad) (ms : 'a M.t list) =
-  fold_right
+let sequence {M : Monad} (ms : 'a M.t list) =
+  List.fold_right
     (fun m m' ->
-       m >>= fun x ->
+       m  >>= fun x ->
        m' >>= fun xs ->
          return (x :: xs))
-    (return [])
     ms
+    (return [])
 
 (* Create a monad using default functor and idiom implementation *)
 module Monad(M : sig
@@ -52,7 +52,7 @@ module Monad(M : sig
                  end) = struct
   (* Functor *)
   let fmap f m = M.bind m (fun x -> M.return (f x))
-  (* Idiom *)
+  (* Applicative *)
   let return = M.return
   let apply fm xm =
     M.bind fm (fun f ->
@@ -90,10 +90,10 @@ module type Monad_plus = sig
 end
 
 module Monad_plus = struct
-  let mzero (implicit M : Monad_plus) = M.mzero
-  let mplus (implicit M : Monad_plus) = M.mplus
+  let mzero {M : Monad_plus} = M.mzero
+  let mplus {M : Monad_plus} = M.mplus
 
-  let mguard (implicit M : Monad_plus) b =
+  let mguard {M : Monad_plus} b =
     if b then
       M.return ()
     else
@@ -106,17 +106,17 @@ module type Foldable = sig
 end
 
 module Foldable = struct
-  let fold (implicit F : Foldable) = F.fold
+  let fold {F : Foldable} = F.fold
 end
 
 module type Traversable = sig
   include Functor
-  val traverse : (implicit F : Applicative) ->
+  val traverse : {F : Applicative} ->
                  ('a -> 'b F.t) -> 'a t -> 'b t F.t
 end
 
 module Traversable = struct
-  let traverse (implicit T : Traversable) = T.traverse
+  let traverse {T : Traversable} = T.traverse
 end
 
 implicit module Option = struct
@@ -150,10 +150,9 @@ implicit module Option = struct
     | None -> acc
     | Some x -> f x acc
 
-  (* Traversable *)
-  let traverse (implicit F : Applicative) f = function
-    | None -> F.pure None
-    | Some x -> F.apply (F.pure (fun x -> Some x)) (f x)
+  let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : a option -> b t F.t = function
+    | None -> F.return None
+    | Some x -> F.fmap (fun x -> Some x) (f x)
 end
 
 implicit module List = struct
@@ -184,8 +183,7 @@ implicit module List = struct
     | x :: xs -> fold f xs (f x acc)
 
   (* Traversable *)
-  let traverse (implicit F : Applicative) f t =
-    let cons = F.pure (fun x xs -> x :: xs) in
-    let cons x xs = F.apply (F.apply cons (F.pure (f x))) xs in
-    fold cons t (F.pure [])
+  let traverse {F : Applicative} f t =
+    let cons x ys = F.apply (F.apply (F.return (fun x xs -> x :: xs)) (f x)) ys in
+    fold cons t (F.return [])
 end
