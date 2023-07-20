@@ -47,6 +47,6 @@ let x = 1 + one() + one();;
 
 let y = 2.5 + 6.0;;
 
-let sq {N : Num} (x : N.t) (y : N.t) = x * x;;
+let sq {N : Num} (x : N.t) = x * x;;
 
 let z = sq 6.0;;

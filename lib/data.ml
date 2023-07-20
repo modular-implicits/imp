@@ -78,8 +78,8 @@ module type Enum = sig
 end
 
 module Enum = struct
-  let succ {M : Enum} x = M.succ
-  let pred {M : Enum} x = M.pred
+  let succ {M : Enum} x = M.succ x
+  let pred {M : Enum} x = M.pred x
 
   let rec fold_enum_to
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
