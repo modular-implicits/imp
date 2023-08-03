@@ -37,3 +37,10 @@ let () =
   let open Imp.Data in
   let e : unit = Monoid.empty () in
   assert (Monoid.append e e = ())
+
+let () =
+  let open Imp.Data in
+  let implicit module IntList = List(struct type t = int end) in
+  let e : int list = Monoid.empty () in
+  assert (e = []);
+  assert (Monoid.append [1; 2] [3] = [1; 2; 3])

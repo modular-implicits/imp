@@ -262,6 +262,14 @@ implicit module String = struct
   let append = (^)
 end
 
+module List (A : Any) = struct
+  type t = A.t list
+
+  (* Monoid *)
+  let empty = []
+  let append = (@)
+end
+
 implicit module Int32 = struct
   type t = int32
 
