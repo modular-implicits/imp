@@ -44,7 +44,8 @@ let sequence {M : Monad} (ms : 'a M.t list) =
     ms
     (return [])
 
-(* Create a monad using default functor and applicative implementation *)
+(* Create a functor, applicative, and monad from just return and bind,
+   using default functor and applicative implementation *)
 module Monad(M : sig
                    type 'a t
                    val return : 'a -> 'a t
