@@ -155,11 +155,7 @@ end = struct
     List.concat (List.map (fun f -> List.map (fun x -> f x) xs) fs)
 
   (* Monad *)
-  let bind x f =
-    let rec aux acc = function
-      | x :: xs -> aux (x @ acc) xs
-      | [] -> acc in
-    aux [] (List.rev_map f x)
+  let bind x f = List.concat (List.map f x)
 
   (* Monad_plus *)
   let mzero = []
