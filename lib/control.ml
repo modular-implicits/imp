@@ -137,7 +137,7 @@ implicit module Option = struct
 end
 
 implicit module List : sig
-  include Functor
+  include Functor with type 'a t = 'a list
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
   include Monad_plus with type 'a t := 'a t
