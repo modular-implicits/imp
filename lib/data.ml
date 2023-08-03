@@ -369,3 +369,11 @@ implicit module Nativeint = struct
   let empty = 0L
   let append = Nativeint.add
 end
+
+implicit module Unit = struct
+  type t = unit
+
+  (* Monoid *)
+  let empty = ()
+  let append () () = ()
+end

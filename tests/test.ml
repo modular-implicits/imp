@@ -1,4 +1,3 @@
-
 let () =
   let open Imp.Num.Num in
   let open implicit Imp.Num in
@@ -33,3 +32,8 @@ let () =
 
     assert (show (4.5, ([9; 10; 11], "hello")) =  "(4.5, ([9; 10; 11], \"hello\"))");
   end
+
+let () =
+  let open Imp.Data in
+  let e : unit = Monoid.empty () in
+  assert (Monoid.append e e = ())
