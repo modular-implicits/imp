@@ -50,3 +50,12 @@ let () =
   let e : int list = Monoid.empty () in
   assert (e = []);
   assert (Monoid.append [1; 2] [3] = [1; 2; 3])
+
+let () =
+  let open Imp.Control in
+  assert (fmap (fun x -> x + 1) [1; 2; 3] = [2; 3; 4]);
+  assert (return 5 = [5]);
+  assert (apply [( * ) 2; ( * ) 3] [1; 2; 3] = [2; 4; 6; 3; 6; 9]);
+  assert (bind [1; 2; 3] (fun x -> [x; x * 2]) = [1; 2; 2; 4; 3; 6]);
+  assert (Foldable.fold ( * ) [2; 3; 3; 7] 1 = 126);
+  assert (Traversable.traverse (fun x -> Some (x + 1)) [1; 2; 3] = Some [2; 3; 4]);
