@@ -40,6 +40,12 @@ let () =
 
 let () =
   let open Imp.Data in
+  let e : string = Monoid.empty () in
+  assert (e = "");
+  assert (Monoid.append "abc" "def" = "abcdef")
+
+let () =
+  let open Imp.Data in
   let implicit module IntList = List(struct type t = int end) in
   let e : int list = Monoid.empty () in
   assert (e = []);
