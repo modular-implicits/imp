@@ -65,7 +65,7 @@ end;;
 
 module type Monad_plus = sig
   include Monad
-  val mzero : unit -> 'a t
+  val mzero : 'a t
   val mplus : 'a t -> 'a t -> 'a t
 end
 
@@ -77,7 +77,7 @@ module Monad_plus = struct
     if b then
       M.return ()
     else
-      M.mzero ()
+      M.mzero
 end
 
 module type Foldable = sig
