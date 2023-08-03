@@ -1,4 +1,4 @@
-(* Funtor, Applicative and Monad module types *)
+(* Functor, Applicative and Monad module types *)
 module type Functor = sig
   type 'a t
   val fmap : ('a -> 'b) -> 'a t -> 'b t
