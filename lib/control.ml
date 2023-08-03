@@ -50,7 +50,7 @@ module Monad(M : sig
                    type 'a t
                    val return : 'a -> 'a t
                    val bind : 'a t -> ('a -> 'b t) -> 'b t
-                 end): Monad = struct
+                 end): Monad with type 'a t = 'a M.t = struct
   type 'a t = 'a M.t
   (* Functor *)
   let fmap f m = M.bind m (fun x -> M.return (f x))
