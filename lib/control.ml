@@ -131,7 +131,7 @@ implicit module Option = struct
     | Some x -> f x acc
 
   (* Traversable *)
-  let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : a option -> b t F.t = function
+  let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : a option -> b option F.t = function
     | None -> F.return None
     | Some x -> F.fmap (fun x -> Some x) (f x)
 end
