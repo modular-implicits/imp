@@ -44,12 +44,13 @@ let sequence {M : Monad} (ms : 'a M.t list) =
     ms
     (return [])
 
-(* Create a monad using default functor and idiom implementation *)
+(* Create a monad using default functor and applicative implementation *)
 module Monad(M : sig
                    type 'a t
                    val return : 'a -> 'a t
                    val bind : 'a t -> ('a -> 'b t) -> 'b t
-                 end) = struct
+                 end): Monad = struct
+  type 'a t = 'a M.t
   (* Functor *)
   let fmap f m = M.bind m (fun x -> M.return (f x))
   (* Applicative *)
@@ -61,27 +62,6 @@ module Monad(M : sig
   (* Monad *)
   let bind = M.bind
 end;;
-
-(* Monad for option *)
-implicit module MonadOption = Monad(struct
-  type 'a t = 'a option
-  let return x = Some x
-  let bind x f = match x with
-    | None -> None
-    | Some x -> f x
-end);;
-
-(* Monad for list *)
-implicit module MonadList = Monad(struct
-  type 'a t = 'a list
-  let return x = [x]
-  let bind x f =
-    let rec aux acc = function
-      | x :: xs -> aux (x @ acc) xs
-      | [] -> acc
-    in
-      aux [] (List.rev_map f x)
-end);;
 
 module type Monad_plus = sig
   include Monad
@@ -128,13 +108,12 @@ implicit module Option = struct
     | Some a -> Some (f a)
 
   (* Applicative *)
-  let pure x = Some x
+  let return x = Some x
   let apply f x = match f, x with
     | Some f, Some x -> Some (f x)
     | _, _ -> None
 
   (* Monad *)
-  let return x = Some x
   let bind x f = match x with
     | None -> None
     | Some x -> f x
@@ -150,6 +129,7 @@ implicit module Option = struct
     | None -> acc
     | Some x -> f x acc
 
+  (* Traversable *)
   let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : a option -> b t F.t = function
     | None -> F.return None
     | Some x -> F.fmap (fun x -> Some x) (f x)
@@ -161,17 +141,16 @@ implicit module List = struct
   (* Functor *)
   let fmap = List.map
 
-  (* Monad *)
+  (* Applicative *)
   let return x = [x]
+  let apply fs xs = bind fs (bind xs)
+
+  (* Monad *)
   let bind x f =
     let rec aux acc = function
       | x :: xs -> aux (x @ acc) xs
       | [] -> acc in
     aux [] (List.rev_map f x)
-
-  (* Applicative *)
-  let pure x = [x]
-  let apply fs xs = bind fs (bind xs)
 
   (* Monad_plus *)
   let mzero = []
