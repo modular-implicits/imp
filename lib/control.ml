@@ -168,6 +168,6 @@ end = struct
 
   (* Traversable *)
   let traverse {F : Applicative} f t =
-    let cons x ys = F.apply (F.apply (F.return (fun x xs -> x :: xs)) (f x)) ys in
+    let cons x ys = F.apply (F.fmap (fun x xs -> x :: xs)) (f x) ys in
     List.fold_right cons t (F.return [])
 end
