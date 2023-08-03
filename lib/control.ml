@@ -135,7 +135,14 @@ implicit module Option = struct
     | Some x -> F.fmap (fun x -> Some x) (f x)
 end
 
-implicit module List = struct
+implicit module List : sig
+  include Functor
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include Monad_plus with type 'a t := 'a t
+  include Foldable with type 'a t := 'a t
+  include Traversable with type 'a t := 'a t
+end = struct
   type 'a t = 'a list
 
   (* Functor *)
