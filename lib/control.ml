@@ -143,7 +143,8 @@ implicit module List = struct
 
   (* Applicative *)
   let return x = [x]
-  let apply fs xs = bind fs (bind xs)
+  let apply fs xs =
+    List.concat (List.map (fun f -> List.map (fun x -> f x) xs) fs)
 
   (* Monad *)
   let bind x f =
