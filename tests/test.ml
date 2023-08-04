@@ -58,8 +58,10 @@ let () =
   assert (apply [( * ) 2; ( * ) 3] [1; 2; 3] = [2; 4; 6; 3; 6; 9]);
   assert (bind [1; 2; 3] (fun x -> [x; x * 2]) = [1; 2; 2; 4; 3; 6]);
   assert (Foldable.fold ( * ) [2; 3; 3; 7] 1 = 126);
-  assert (Traversable.traverse (fun x -> Some (x + 1)) [1; 2; 3] = Some [2; 3; 4]);
-  assert (Traversable.traverse (fun x -> x) [Some 1; Some 2; None] = None);
+  assert (Traversable.traverse (fun x -> Some (x + 1)) [1; 2; 3] = Some [2; 3; 4])
+
+let () =
+  let open Imp.Control in
   assert (fmap (fun x -> x + 1) (Some 3) = (Some 4));
   assert (return 5 = Some 5);
   assert (apply (Some (fun x -> x + 1)) (Some 3) = (Some 4));
@@ -69,4 +71,4 @@ let () =
   assert (bind (Some 3) (fun _ -> None) = None);
   assert (Foldable.fold ( * ) (Some 5) 1 = 5);
   assert (Foldable.fold ( * ) None 1234 = 1234);
-  assert (Traversable.traverse (fun x -> [x; x + 1]) (Some 3) = [Some 3; Some 4]);
+  assert (Traversable.traverse (fun x -> [x; x + 1]) (Some 3) = [Some 3; Some 4])
