@@ -162,9 +162,7 @@ end = struct
   let mplus = (@)
 
   (* Foldable *)
-  let rec fold f t acc = match t with
-    | [] -> acc
-    | x :: xs -> fold f xs (f x acc)
+  let fold = List.fold_left
 
   (* Traversable *)
   let traverse {F : Applicative} f t =
