@@ -72,3 +72,17 @@ let () =
   assert (Foldable.fold ( * ) (Some 5) 1 = 5);
   assert (Foldable.fold ( * ) None 1234 = 1234);
   assert (Traversable.traverse (fun x -> [x; x + 1]) (Some 3) = [Some 3; Some 4])
+
+let () =
+  let open Imp.Control in
+  let open implicit Imp.Any in
+  let pair x y = (x, y) in
+  assert ((fmap (fun x -> x + 1) (int_of_string)) "3" = 4);
+  assert ((return 4) "3" = 4);
+  assert ((apply pair (fun x -> x * x)) 3 = (3, 9));
+  assert ((bind (fun x -> x * x) pair) 3 = (9, 3))
+
+let () =
+  let open Imp.Control in
+  let open implicit Imp.Any in
+  assert (fmap (fun x -> x + 1) ("hello", 3) = ("hello", 4))

@@ -1,6 +1,4 @@
-module type Any = sig
-  type t
-end
+open Any
 
 module type Show = sig
   type t

@@ -1,3 +1,5 @@
+open Any
+
 (* Functor, Applicative and Monad module types *)
 module type Functor = sig
   type 'a t
@@ -175,4 +177,29 @@ end = struct
   let traverse {F : Applicative} f t =
     let cons x ys = F.apply (F.fmap (fun x xs -> x :: xs) (f x)) ys in
     List.fold_right cons t (F.return [])
+end
+
+implicit module Function {A : Any} : sig
+  include Functor with type 'b t = A.t -> 'b
+  include Applicative with type 'b t := 'b t
+  include Monad with type 'b t := 'b t
+end = struct
+  type 'b t = A.t -> 'b
+
+  (* Functor *)
+  let fmap m f x = m (f x)
+
+  (* Applicative *)
+  let return x _ = x
+  let apply f g x = f x (g x)
+
+  (* Monad *)
+  let bind g f x = f (g x) x
+end
+(** (a -> b) is an instance of Monad b - it behaves like the reader monad *)
+
+implicit module Pair {A : Any} : Functor with type 'b t = A.t * 'b = struct
+  type 'b t = A.t * 'b
+
+  let fmap m (a, b) = (a, m b)
 end
