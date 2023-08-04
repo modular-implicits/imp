@@ -15,6 +15,11 @@ implicit module ShowString = struct
   let show = Printf.sprintf "%S"
 end;;
 
+implicit module ShowBool = struct
+  type t = bool
+  let show = Printf.sprintf "%b"
+end;;
+
 implicit module ShowInt = struct
   type t = int
   let show = string_of_int

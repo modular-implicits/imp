@@ -1,18 +1,5 @@
 open Any
 
-module type Show = sig
-  type t
-  val to_string: t -> string
-  val buffer_add : Buffer.t -> t -> unit
-  val pp_print : Format.formatter -> t -> unit
-end
-
-module Show = struct
-  let to_string {M : Show} = M.to_string
-  let buffer_add {M : Show} = M.buffer_add
-  let pp_print {M : Show} = M.pp_print
-end
-
 module type Eq = sig
   type t
   val ( = ) : t -> t -> bool
@@ -118,11 +105,6 @@ end
 implicit module Int = struct
   type t = int
 
-  (* Show *)
-  let to_string = string_of_int
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print = Format.pp_print_int
-
   (* Eq *)
   let ( = ) (a : int) b = a = b
 
@@ -154,11 +136,6 @@ end
 implicit module Float = struct
   type t = float
 
-  (* Show *)
-  let to_string = string_of_float
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print = Format.pp_print_float
-
   (* Eq *)
   let ( = ) (a : float) b = a = b
 
@@ -186,11 +163,6 @@ end
 implicit module Bool = struct
   type t = bool
 
-  (* Show *)
-  let to_string = string_of_bool
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print = Format.pp_print_bool
-
   (* Eq *)
   let ( = ) (a : bool) b = a = b
 
@@ -217,11 +189,6 @@ end
 implicit module Char = struct
   type t = char
 
-  (* Show *)
-  let to_string c = String.escaped (String.make 1 c)
-  let buffer_add b c = Buffer.add_string b (to_string c)
-  let pp_print ppf c = Format.pp_print_string ppf c
-
   (* Eq *)
   let ( = ) (a : char) b = a = b
 
@@ -244,11 +211,6 @@ end
 implicit module String = struct
   type t = string
 
-  (* Show *)
-  let to_string = String.escaped
-  let buffer_add b s = Buffer.add_string b (to_string s)
-  let pp_print ppf s = Format.pp_print_string ppf (to_string s)
-
   (* Eq *)
   let ( = ) (a : string) b = a = b
 
@@ -270,11 +232,6 @@ end
 
 implicit module Int32 = struct
   type t = int32
-
-  (* Show *)
-  let to_string = Int32.to_string
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print ppf s = Format.pp_print_string ppf (to_string s)
 
   (* Eq *)
   let ( = ) (a : int32) b = a = b
@@ -307,11 +264,6 @@ end
 implicit module Int64 = struct
   type t = int64
 
-  (* Show *)
-  let to_string = Int64.to_string
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print ppf i = Format.pp_print_string ppf (to_string i)
-
   (* Eq *)
   let ( = ) (a : int64) b = a = b
 
@@ -342,11 +294,6 @@ end
 
 implicit module Nativeint = struct
   type t = nativeint
-
-  (* Show *)
-  let to_string = Nativeint.to_string
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print ppf i = Format.pp_print_string ppf (to_string i)
 
   (* Eq *)
   let ( = ) (a : nativeint) b = a = b
