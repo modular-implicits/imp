@@ -100,7 +100,14 @@ module Traversable = struct
   let traverse {T : Traversable} = T.traverse
 end
 
-implicit module Option = struct
+implicit module Option: sig
+  include Functor with type 'a t = 'a option
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include Monad_plus with type 'a t := 'a t
+  include Foldable with type 'a t := 'a t
+  include Traversable with type 'a t := 'a t
+end = struct
   type 'a t = 'a option
 
   (* Functor *)
