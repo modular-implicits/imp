@@ -162,10 +162,10 @@ end = struct
   let mplus = (@)
 
   (* Foldable *)
-  let fold = List.fold_left
+  let fold f xs a = List.fold_left (fun x y -> f y x) a xs
 
   (* Traversable *)
   let traverse {F : Applicative} f t =
-    let cons x ys = F.apply (F.fmap (fun x xs -> x :: xs)) (f x) ys in
+    let cons x ys = F.apply (F.fmap (fun x xs -> x :: xs) (f x)) ys in
     List.fold_right cons t (F.return [])
 end
