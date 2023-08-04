@@ -59,6 +59,8 @@ let () =
   assert (bind [1; 2; 3] (fun x -> [x; x * 2]) = [1; 2; 2; 4; 3; 6]);
   assert (Foldable.fold ( * ) [2; 3; 3; 7] 1 = 126);
   assert (Traversable.traverse (fun x -> Some (x + 1)) [1; 2; 3] = Some [2; 3; 4])
+  (* let sequence {F : Applicative} {T : Traversable} = T.traverse {F} (fun x -> x) in *)
+  (* assert (sequence {List} {Option} [Some 1; Some 2; Some 3] = Some [1; 2; 3]) *)
 
 let () =
   let open Imp.Control in
