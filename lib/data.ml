@@ -260,8 +260,8 @@ implicit module String = struct
   let append = (^)
 end
 
-module List (A : Any) = struct
-  type t = A.t list
+module List {A : Any} : Monoid with type t = A.t_for_any list = struct
+  type t = A.t_for_any list
 
   (* Monoid *)
   let empty = []

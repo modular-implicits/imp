@@ -45,11 +45,11 @@ let () =
   assert (Monoid.append "abc" "def" = "abcdef")
 
 let () =
+  let open Imp.Any in
   let open Imp.Data in
-  let implicit module IntList = List(struct type t = int end) in
-  let e : int list = Monoid.empty () in
+  let e : int list = Monoid.empty {List {Any_Int}} () in
   assert (e = []);
-  assert (Monoid.append [1; 2] [3] = [1; 2; 3])
+  assert (Monoid.append {List {Any_Int}} [1; 2] [3] = [1; 2; 3])
 
 let () =
   let open Imp.Control in
