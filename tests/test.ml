@@ -1,12 +1,12 @@
 let () =
-  let open Imp.Num.Num in
-  let open implicit Imp.Num in
+  let open Imp.Data.Num in
+  let open implicit Imp.Data in
   begin
     let x = 1 + one() + one() in
     assert (x = 3);
     let y = 2.5 + 6.0 in
     assert (y = 8.5);
-    let sq {N : Imp.Num.Num} (x : N.t) = x * x in
+    let sq {N : Imp.Data.Num} (x : N.t) = x * x in
     let z = sq 6.0 in
     assert (z = 36.0);
   end
