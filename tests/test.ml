@@ -93,5 +93,11 @@ let () =
   let open Imp.Any in
   let open Imp.Control in
   let open Imp.Transformers in
-  let test = bind {ReaderT {Any_String} {Option}} (ask {Any_String} {Option}) (fun x -> lift {Any_String} {Option} (Some (x ^ "!"))) in
-  assert (runReaderT {Any_String} {Option} test "hello" = Some "hello!")
+  let module R = ReaderT {Any_String} {Option} in
+  let test = bind {R} (ask {R}) (fun x -> return [x ^ "!"]) in
+  assert (runReaderT {Option} test "hello" = Some ["hello!"]);
+  let test = bind {R} (ask {R}) (fun _ -> lift {Option} None) in
+  assert (runReaderT {Option} test "hello" = None);
+  let module R = Reader {Any_String} in
+  let test = bind {R} (ask {R}) (fun x -> return [x ^ "!"]) in
+  assert (runReader test "hello" = ["hello!"])
