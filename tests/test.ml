@@ -88,3 +88,10 @@ let () =
   let open Imp.Control in
   let open implicit Imp.Any in
   assert (fmap (fun x -> x + 1) ("hello", 3) = ("hello", 4))
+
+let () =
+  let open Imp.Any in
+  let open Imp.Control in
+  let open Imp.Transformers in
+  let test = bind {ReaderT {Any_String} {Option}} (ask {Any_String} {Option}) (fun x -> lift {Any_String} {Option} (Some (x ^ "!"))) in
+  assert (runReaderT {Any_String} {Option} test "hello" = Some "hello!")
