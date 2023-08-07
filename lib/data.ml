@@ -108,7 +108,13 @@ end
 
 (* Instances *)
 
-implicit module Int = struct
+implicit module Int: sig
+  include Eq with type t = int
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = int
 
   (* Eq *)
@@ -135,7 +141,12 @@ implicit module Int = struct
   let pred = pred
 end
 
-implicit module Float = struct
+implicit module Float: sig
+  include Eq with type t = float
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+end = struct
   type t = float
 
   (* Eq *)
@@ -158,7 +169,12 @@ implicit module Float = struct
   let bounds = (neg_infinity, infinity)
 end
 
-implicit module Bool = struct
+implicit module Bool: sig
+  include Eq with type t = bool
+  include Ord with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = bool
 
   (* Eq *)
@@ -168,7 +184,7 @@ implicit module Bool = struct
   let compare (a : bool) b = Ord.translateCompare (compare a b)
 
   (* Bounded *)
-  let bounds = (neg_infinity, infinity)
+  let bounds = (false, true)
 
   (* Enum *)
   let succ = function
@@ -180,7 +196,12 @@ implicit module Bool = struct
     | false -> invalid_arg "Bool.pred"
 end
 
-implicit module Char = struct
+implicit module Char: sig
+  include Eq with type t = char
+  include Ord with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = char
 
   (* Eq *)
@@ -202,7 +223,11 @@ implicit module Char = struct
     | n -> Char.chr (pred (Char.code n))
 end
 
-implicit module String = struct
+implicit module String: sig
+  include Eq with type t = string
+  include Ord with type t := t
+  include Monoid with type t := t
+end = struct
   type t = string
 
   (* Eq *)
@@ -224,7 +249,13 @@ module List {A : Any} : Monoid with type t = A.t_for_any list = struct
   let append = (@)
 end
 
-implicit module Int32 = struct
+implicit module Int32: sig
+  include Eq with type t = int32
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = int32
 
   (* Eq *)
@@ -251,7 +282,13 @@ implicit module Int32 = struct
   let pred = Int32.pred
 end
 
-implicit module Int64 = struct
+implicit module Int64: sig
+  include Eq with type t = int64
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = int64
 
   (* Eq *)
@@ -278,7 +315,13 @@ implicit module Int64 = struct
   let pred = Int64.pred
 end
 
-implicit module Nativeint = struct
+implicit module Nativeint: sig
+  include Eq with type t = nativeint
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = nativeint
 
   (* Eq *)
@@ -288,8 +331,8 @@ implicit module Nativeint = struct
   let compare a b = Ord.translateCompare (Nativeint.compare a b)
 
   (* Num *)
-  let zero = 0L
-  let one  = 1L
+  let zero = Nativeint.of_int 0
+  let one  = Nativeint.of_int 1
   let of_int = Nativeint.of_int
   let ( + ) = Nativeint.add
   let ( - ) = Nativeint.sub
@@ -305,7 +348,7 @@ implicit module Nativeint = struct
   let pred = Nativeint.pred
 end
 
-implicit module Unit = struct
+implicit module Unit: Monoid with type t = unit = struct
   type t = unit
 
   (* Monoid *)
