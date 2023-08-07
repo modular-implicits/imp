@@ -9,18 +9,24 @@ module Eq = struct
   let ( = ) {M : Eq} = M.(=)
 end
 
+type ordering = LT | GT | EQ
+
 module type Ord = sig
   type t
-  val compare : t -> t -> int
+  val compare : t -> t -> ordering
 end
 
 module Ord = struct
-  let ( =  ) {M : Ord} a b = M.compare a b =  0
-  let ( <> ) {M : Ord} a b = M.compare a b <> 0
-  let ( <  ) {M : Ord} a b = M.compare a b <  0
-  let ( <= ) {M : Ord} a b = M.compare a b <= 0
-  let ( >  ) {M : Ord} a b = M.compare a b >  0
-  let ( >= ) {M : Ord} a b = M.compare a b >= 0
+  let translateCompare (n : int) =
+    if n < 0 then LT
+    else if n = 0 then EQ
+    else (* if n > 0 then *) GT
+  let ( <  ) {M : Ord} a b = M.compare a b = LT
+  let ( <= ) {M : Ord} a b = M.compare a b <> GT
+  let ( >  ) {M : Ord} a b = M.compare a b = GT
+  let ( >= ) {M : Ord} a b = M.compare a b <> LT
+  let ( =  ) {M : Ord} a b = M.compare a b =  EQ
+  let ( <> ) {M : Ord} a b = M.compare a b <> EQ
   let compare {M : Ord} = M.compare
 end
 
@@ -69,7 +75,7 @@ module Enum = struct
   let rec fold_enum_to
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
     = fun {M : Enum} a b f acc ->
-    if M.compare a b < 0 then
+    if M.compare a b = LT then
       fold_enum_to (M.succ a) b f (f a acc)
     else
       acc
@@ -77,7 +83,7 @@ module Enum = struct
   let rec fold_enum_downto
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
     = fun {M : Enum} a b f acc ->
-    if M.compare b a < 0 then
+    if M.compare b a = LT then
       fold_enum_downto (M.pred a) b f (f a acc)
     else
       acc
@@ -109,7 +115,7 @@ implicit module Int = struct
   let ( = ) (a : int) b = a = b
 
   (* Ord *)
-  let compare (a : int) b = compare a b
+  let compare (a : int) b = Ord.translateCompare (compare a b)
 
   (* Num *)
   let zero = 0
@@ -140,7 +146,7 @@ implicit module Float = struct
   let ( = ) (a : float) b = a = b
 
   (* Ord *)
-  let compare (a : float) b = compare a b
+  let compare (a : float) b = Ord.translateCompare (compare a b)
 
   (* Num *)
   let zero = 0.
@@ -167,7 +173,7 @@ implicit module Bool = struct
   let ( = ) (a : bool) b = a = b
 
   (* Ord *)
-  let compare (a : bool) b = compare a b
+  let compare (a : bool) b = Ord.translateCompare (compare a b)
 
   (* Bounded *)
   let bounds = (neg_infinity, infinity)
@@ -193,7 +199,7 @@ implicit module Char = struct
   let ( = ) (a : char) b = a = b
 
   (* Ord *)
-  let compare (a : char) b = compare a b
+  let compare (a : char) b = Ord.translateCompare (compare a b)
 
   (* Bounded *)
   let bounds = ('\000', '\255')
@@ -215,7 +221,7 @@ implicit module String = struct
   let ( = ) (a : string) b = a = b
 
   (* Ord *)
-  let compare (a : string) b = compare a b
+  let compare (a : string) b = Ord.translateCompare (compare a b)
 
   (* Monoid *)
   let empty = ""
@@ -237,7 +243,7 @@ implicit module Int32 = struct
   let ( = ) (a : int32) b = a = b
 
   (* Ord *)
-  let compare = Int32.compare
+  let compare a b = Ord.translateCompare (Int32.compare a b)
 
   (* Num *)
   let zero = 0l
@@ -268,7 +274,7 @@ implicit module Int64 = struct
   let ( = ) (a : int64) b = a = b
 
   (* Ord *)
-  let compare = Int64.compare
+  let compare a b = Ord.translateCompare (Int64.compare a b)
 
   (* Num *)
   let zero = 0L
@@ -299,7 +305,7 @@ implicit module Nativeint = struct
   let ( = ) (a : nativeint) b = a = b
 
   (* Ord *)
-  let compare = Nativeint.compare
+  let compare a b = Ord.translateCompare (Nativeint.compare a b)
 
   (* Num *)
   let zero = 0L
