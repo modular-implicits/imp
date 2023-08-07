@@ -133,10 +133,6 @@ implicit module Int = struct
   (* Enum *)
   let succ = succ
   let pred = pred
-
-  (* Monoid, addition *)
-  let empty = 0
-  let append = (+)
 end
 
 implicit module Float = struct
@@ -160,10 +156,6 @@ implicit module Float = struct
 
   (* Bounded *)
   let bounds = (neg_infinity, infinity)
-
-  (* Monoid, addition *)
-  let empty = 0.
-  let append = (+.)
 end
 
 implicit module Bool = struct
@@ -186,10 +178,6 @@ implicit module Bool = struct
   let pred = function
     | true  -> false
     | false -> invalid_arg "Bool.pred"
-
-  (* Monoid, addition *)
-  let empty = false
-  let append = (||)
 end
 
 implicit module Char = struct
@@ -261,10 +249,6 @@ implicit module Int32 = struct
   (* Enum *)
   let succ = Int32.succ
   let pred = Int32.pred
-
-  (* Monoid, addition *)
-  let empty = 0l
-  let append = Int32.add
 end
 
 implicit module Int64 = struct
@@ -292,10 +276,6 @@ implicit module Int64 = struct
   (* Enum *)
   let succ = Int64.succ
   let pred = Int64.pred
-
-  (* Monoid, addition *)
-  let empty = 0L
-  let append = Int64.add
 end
 
 implicit module Nativeint = struct
@@ -323,10 +303,6 @@ implicit module Nativeint = struct
   (* Enum *)
   let succ = Nativeint.succ
   let pred = Nativeint.pred
-
-  (* Monoid, addition *)
-  let empty = 0L
-  let append = Nativeint.add
 end
 
 implicit module Unit = struct
