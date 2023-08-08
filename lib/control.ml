@@ -203,3 +203,26 @@ implicit module Pair {A : Any} : Functor with type 'b t = A.t_for_any * 'b = str
 
   let fmap m (a, b) = (a, m b)
 end
+
+type ('a, 'b) const = Const of 'a
+
+implicit module Const {A : Any}: sig
+  include Functor with type 'b t = (A.t_for_any, 'b) const
+end = struct
+  type 'b t = (A.t_for_any, 'b) const
+  let fmap _ (Const x) = (Const x)
+end
+
+type 'b identity = Identity of 'b
+
+implicit module Identity: sig
+  include Functor with type 'b t = 'b identity
+  include Applicative with type 'b t := 'b t
+  include Monad with type 'b t := 'b t
+end = struct
+  type 'b t = 'b identity
+  let fmap f (Identity b) = Identity (f b)
+  let return b = Identity b
+  let apply (Identity f) (Identity x) = Identity (f x)
+  let bind (Identity x) f = f x
+end
