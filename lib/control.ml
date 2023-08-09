@@ -213,6 +213,14 @@ end = struct
   let fmap _ (Const x) = (Const x)
 end
 
+implicit module Const_Applicative {A: Data.Monoid}: Applicative with type 'b t = (A.t, 'b) const
+= struct
+  type 'b t = (A.t, 'b) const
+  let fmap _ (Const x) = (Const x)
+  let return _ = Const (Data.Monoid.empty ())
+  let apply (Const a) (Const a') = Const (Data.Monoid.append a a')
+end
+
 type 'b identity = Identity of 'b
 
 implicit module Identity: sig
