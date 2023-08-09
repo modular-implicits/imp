@@ -1,7 +1,7 @@
 open Any
 open Control
 
-type ('r, 'am) readerT
+type ('r, +'am) readerT
 (** The Reader and ReaderT monads.
     For ReaderT, transforming an inner monad m, use ('r, 'a m) readerT
     For Reader, with no inner monad, use ('r 'a) readerT
