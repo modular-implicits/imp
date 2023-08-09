@@ -101,3 +101,10 @@ let () =
   let module R = Reader {Any_String} in
   let test = bind {R} (ask {R}) (fun x -> return [x ^ "!"]) in
   assert (runReader test "hello" = ["hello!"])
+
+
+let () = 
+  let open Imp in
+  let open Imp.Comonads in
+  assert (5 = Comonads.extract (Control.Identity 5));
+  assert (10 = Comonads.extract  (Comonads.NonEmpty (10, [])))
