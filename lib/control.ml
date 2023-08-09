@@ -2,7 +2,7 @@ open Any
 
 (* Functor, Applicative and Monad module types *)
 module type Functor = sig
-  type 'a t
+  type +'a t
   val fmap : ('a -> 'b) -> 'a t -> 'b t
 end;;
 
@@ -49,11 +49,11 @@ let sequence {M : Monad} (ms : 'a M.t list) =
 (* Create a functor, applicative, and monad from just return and bind,
    using default functor and applicative implementation *)
 module Monad(M : sig
-                   type 'a t
+                   type +'a t
                    val return : 'a -> 'a t
                    val bind : 'a t -> ('a -> 'b t) -> 'b t
                  end): Monad with type 'a t = 'a M.t = struct
-  type 'a t = 'a M.t
+  type +'a t = 'a M.t
   (* Functor *)
   let fmap f m = M.bind m (fun x -> M.return (f x))
   (* Applicative *)
