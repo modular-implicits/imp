@@ -1,6 +1,8 @@
-(* Funtor, Applicative and Monad module types *)
+open Any
+
+(* Functor, Applicative and Monad module types *)
 module type Functor = sig
-  type 'a t
+  type +'a t
   val fmap : ('a -> 'b) -> 'a t -> 'b t
 end;;
 
@@ -44,12 +46,14 @@ let sequence {M : Monad} (ms : 'a M.t list) =
     ms
     (return [])
 
-(* Create a monad using default functor and idiom implementation *)
+(* Create a functor, applicative, and monad from just return and bind,
+   using default functor and applicative implementation *)
 module Monad(M : sig
-                   type 'a t
+                   type +'a t
                    val return : 'a -> 'a t
                    val bind : 'a t -> ('a -> 'b t) -> 'b t
-                 end) = struct
+                 end): Monad with type 'a t = 'a M.t = struct
+  type +'a t = 'a M.t
   (* Functor *)
   let fmap f m = M.bind m (fun x -> M.return (f x))
   (* Applicative *)
@@ -62,30 +66,9 @@ module Monad(M : sig
   let bind = M.bind
 end;;
 
-(* Monad for option *)
-implicit module MonadOption = Monad(struct
-  type 'a t = 'a option
-  let return x = Some x
-  let bind x f = match x with
-    | None -> None
-    | Some x -> f x
-end);;
-
-(* Monad for list *)
-implicit module MonadList = Monad(struct
-  type 'a t = 'a list
-  let return x = [x]
-  let bind x f =
-    let rec aux acc = function
-      | x :: xs -> aux (x @ acc) xs
-      | [] -> acc
-    in
-      aux [] (List.rev_map f x)
-end);;
-
 module type Monad_plus = sig
   include Monad
-  val mzero : unit -> 'a t
+  val mzero : 'a t
   val mplus : 'a t -> 'a t -> 'a t
 end
 
@@ -97,7 +80,7 @@ module Monad_plus = struct
     if b then
       M.return ()
     else
-      M.mzero ()
+      M.mzero
 end
 
 module type Foldable = sig
@@ -119,7 +102,14 @@ module Traversable = struct
   let traverse {T : Traversable} = T.traverse
 end
 
-implicit module Option = struct
+implicit module Option: sig
+  include Functor with type 'a t = 'a option
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include Monad_plus with type 'a t := 'a t
+  include Foldable with type 'a t := 'a t
+  include Traversable with type 'a t := 'a t
+end = struct
   type 'a t = 'a option
 
   (* Functor *)
@@ -128,13 +118,12 @@ implicit module Option = struct
     | Some a -> Some (f a)
 
   (* Applicative *)
-  let pure x = Some x
+  let return x = Some x
   let apply f x = match f, x with
     | Some f, Some x -> Some (f x)
     | _, _ -> None
 
   (* Monad *)
-  let return x = Some x
   let bind x f = match x with
     | None -> None
     | Some x -> f x
@@ -150,40 +139,98 @@ implicit module Option = struct
     | None -> acc
     | Some x -> f x acc
 
-  let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : a option -> b t F.t = function
+  (* Traversable *)
+  let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : a option -> b option F.t = function
     | None -> F.return None
     | Some x -> F.fmap (fun x -> Some x) (f x)
 end
 
-implicit module List = struct
+implicit module List : sig
+  include Functor with type 'a t = 'a list
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include Monad_plus with type 'a t := 'a t
+  include Foldable with type 'a t := 'a t
+  include Traversable with type 'a t := 'a t
+end = struct
   type 'a t = 'a list
 
   (* Functor *)
   let fmap = List.map
 
-  (* Monad *)
-  let return x = [x]
-  let bind x f =
-    let rec aux acc = function
-      | x :: xs -> aux (x @ acc) xs
-      | [] -> acc in
-    aux [] (List.rev_map f x)
-
   (* Applicative *)
-  let pure x = [x]
-  let apply fs xs = bind fs (bind xs)
+  let return x = [x]
+  let apply fs xs =
+    List.concat (List.map (fun f -> List.map (fun x -> f x) xs) fs)
+
+  (* Monad *)
+  let bind x f = List.concat (List.map f x)
 
   (* Monad_plus *)
   let mzero = []
   let mplus = (@)
 
   (* Foldable *)
-  let rec fold f t acc = match t with
-    | [] -> acc
-    | x :: xs -> fold f xs (f x acc)
+  let fold f xs a = List.fold_left (fun x y -> f y x) a xs
 
   (* Traversable *)
   let traverse {F : Applicative} f t =
-    let cons x ys = F.apply (F.apply (F.return (fun x xs -> x :: xs)) (f x)) ys in
-    fold cons t (F.return [])
+    let cons x ys = F.apply (F.fmap (fun x xs -> x :: xs) (f x)) ys in
+    List.fold_right cons t (F.return [])
+end
+
+implicit module Function {A : Any} : sig
+  include Functor with type 'b t = A.t_for_any -> 'b
+  include Applicative with type 'b t := 'b t
+  include Monad with type 'b t := 'b t
+end = struct
+  type 'b t = A.t_for_any -> 'b
+
+  (* Functor *)
+  let fmap m f x = m (f x)
+
+  (* Applicative *)
+  let return x _ = x
+  let apply f g x = f x (g x)
+
+  (* Monad *)
+  let bind g f x = f (g x) x
+end
+(** (a -> b) is an instance of Monad b - it behaves like the reader monad *)
+
+implicit module Pair {A : Any} : Functor with type 'b t = A.t_for_any * 'b = struct
+  type 'b t = A.t_for_any * 'b
+
+  let fmap m (a, b) = (a, m b)
+end
+
+type ('a, 'b) const = Const of 'a
+
+implicit module Const {A : Any}: sig
+  include Functor with type 'b t = (A.t_for_any, 'b) const
+end = struct
+  type 'b t = (A.t_for_any, 'b) const
+  let fmap _ (Const x) = (Const x)
+end
+
+implicit module Const_Applicative {A: Data.Monoid}: Applicative with type 'b t = (A.t, 'b) const
+= struct
+  type 'b t = (A.t, 'b) const
+  let fmap _ (Const x) = (Const x)
+  let return _ = Const (Data.Monoid.empty ())
+  let apply (Const a) (Const a') = Const (Data.Monoid.append a a')
+end
+
+type 'b identity = Identity of 'b
+
+implicit module Identity: sig
+  include Functor with type 'b t = 'b identity
+  include Applicative with type 'b t := 'b t
+  include Monad with type 'b t := 'b t
+end = struct
+  type 'b t = 'b identity
+  let fmap f (Identity b) = Identity (f b)
+  let return b = Identity b
+  let apply (Identity f) (Identity x) = Identity (f x)
+  let bind (Identity x) f = f x
 end

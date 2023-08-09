@@ -3,7 +3,7 @@ name: "imp"
 synopsis: "Experimental library using modular implicits"
 version: "dev"
 maintainer: "yallop@gmail.com"
-authors: ["Leo White" "Jeremy Yallop"]
+authors: ["Leo White" "Jeremy Yallop" "Patrick Reader"]
 homepage: "https://github.com/modular-implicits/imp"
 dev-repo: "git+https://github.com/modular-implicits/imp.git"
 bug-reports: "http://github.com/modular-implicits/imp/issues"

@@ -1,4 +1,4 @@
 (library
  (public_name imp)
- (modules Control Data Num Scope Show)
+ (modules Any Control Data Scope Show)
  (synopsis "Experimental library using modular implicits"))

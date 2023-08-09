@@ -1,19 +1,4 @@
-module type Any = sig
-  type t
-end
-
-module type Show = sig
-  type t
-  val to_string: t -> string
-  val buffer_add : Buffer.t -> t -> unit
-  val pp_print : Format.formatter -> t -> unit
-end
-
-module Show = struct
-  let to_string {M : Show} = M.to_string
-  let buffer_add {M : Show} = M.buffer_add
-  let pp_print {M : Show} = M.pp_print
-end
+open Any
 
 module type Eq = sig
   type t
@@ -24,18 +9,25 @@ module Eq = struct
   let ( = ) {M : Eq} = M.(=)
 end
 
+type ordering = LT | GT | EQ
+
 module type Ord = sig
   type t
-  val compare : t -> t -> int
+  val compare : t -> t -> ordering
 end
 
 module Ord = struct
-  let ( =  ) {M : Ord} a b = M.compare a b =  0
-  let ( <> ) {M : Ord} a b = M.compare a b <> 0
-  let ( <  ) {M : Ord} a b = M.compare a b <  0
-  let ( <= ) {M : Ord} a b = M.compare a b <= 0
-  let ( >  ) {M : Ord} a b = M.compare a b >  0
-  let ( >= ) {M : Ord} a b = M.compare a b >= 0
+  let translateCompare (compare : 'a -> 'a -> int) =
+    fun x y -> let n = compare x y in
+    if n < 0 then LT
+    else if n = 0 then EQ
+    else (* if n > 0 then *) GT
+  let ( <  ) {M : Ord} a b = M.compare a b = LT
+  let ( <= ) {M : Ord} a b = M.compare a b <> GT
+  let ( >  ) {M : Ord} a b = M.compare a b = GT
+  let ( >= ) {M : Ord} a b = M.compare a b <> LT
+  let ( =  ) {M : Ord} a b = M.compare a b =  EQ
+  let ( <> ) {M : Ord} a b = M.compare a b <> EQ
   let compare {M : Ord} = M.compare
 end
 
@@ -84,7 +76,7 @@ module Enum = struct
   let rec fold_enum_to
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
     = fun {M : Enum} a b f acc ->
-    if M.compare a b < 0 then
+    if M.compare a b = LT then
       fold_enum_to (M.succ a) b f (f a acc)
     else
       acc
@@ -92,7 +84,7 @@ module Enum = struct
   let rec fold_enum_downto
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
     = fun {M : Enum} a b f acc ->
-    if M.compare b a < 0 then
+    if M.compare b a = LT then
       fold_enum_downto (M.pred a) b f (f a acc)
     else
       acc
@@ -117,19 +109,20 @@ end
 
 (* Instances *)
 
-implicit module Int = struct
+implicit module Int: sig
+  include Eq with type t = int
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = int
-
-  (* Show *)
-  let to_string = string_of_int
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print = Format.pp_print_int
 
   (* Eq *)
   let ( = ) (a : int) b = a = b
 
   (* Ord *)
-  let compare (a : int) b = compare a b
+  let compare (a : int) b = Ord.translateCompare compare a b
 
   (* Num *)
   let zero = 0
@@ -147,25 +140,21 @@ implicit module Int = struct
   (* Enum *)
   let succ = succ
   let pred = pred
-
-  (* Monoid, addition *)
-  let empty = 0
-  let append = (+)
 end
 
-implicit module Float = struct
+implicit module Float: sig
+  include Eq with type t = float
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+end = struct
   type t = float
-
-  (* Show *)
-  let to_string = string_of_float
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print = Format.pp_print_float
 
   (* Eq *)
   let ( = ) (a : float) b = a = b
 
   (* Ord *)
-  let compare (a : float) b = compare a b
+  let compare (a : float) b = Ord.translateCompare compare a b
 
   (* Num *)
   let zero = 0.
@@ -179,28 +168,24 @@ implicit module Float = struct
 
   (* Bounded *)
   let bounds = (neg_infinity, infinity)
-
-  (* Monoid, addition *)
-  let empty = 0.
-  let append = (+.)
 end
 
-implicit module Bool = struct
+implicit module Bool: sig
+  include Eq with type t = bool
+  include Ord with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = bool
-
-  (* Show *)
-  let to_string = string_of_bool
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print = Format.pp_print_bool
 
   (* Eq *)
   let ( = ) (a : bool) b = a = b
 
   (* Ord *)
-  let compare (a : bool) b = compare a b
+  let compare (a : bool) b = Ord.translateCompare compare a b
 
   (* Bounded *)
-  let bounds = (neg_infinity, infinity)
+  let bounds = (false, true)
 
   (* Enum *)
   let succ = function
@@ -210,25 +195,21 @@ implicit module Bool = struct
   let pred = function
     | true  -> false
     | false -> invalid_arg "Bool.pred"
-
-  (* Monoid, addition *)
-  let empty = false
-  let append = (||)
 end
 
-implicit module Char = struct
+implicit module Char: sig
+  include Eq with type t = char
+  include Ord with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = char
-
-  (* Show *)
-  let to_string c = String.escaped (String.make 1 c)
-  let buffer_add b c = Buffer.add_string b (to_string c)
-  let pp_print ppf c = Format.pp_print_string ppf c
 
   (* Eq *)
   let ( = ) (a : char) b = a = b
 
   (* Ord *)
-  let compare (a : char) b = compare a b
+  let compare (a : char) b = Ord.translateCompare compare a b
 
   (* Bounded *)
   let bounds = ('\000', '\255')
@@ -243,38 +224,46 @@ implicit module Char = struct
     | n -> Char.chr (pred (Char.code n))
 end
 
-implicit module String = struct
+implicit module String: sig
+  include Eq with type t = string
+  include Ord with type t := t
+  include Monoid with type t := t
+end = struct
   type t = string
-
-  (* Show *)
-  let to_string = String.escaped
-  let buffer_add b s = Buffer.add_string b (to_string s)
-  let pp_print ppf s = Format.pp_print_string ppf (to_string s)
 
   (* Eq *)
   let ( = ) (a : string) b = a = b
 
   (* Ord *)
-  let compare (a : string) b = compare a b
+  let compare (a : string) b = Ord.translateCompare compare a b
 
   (* Monoid *)
   let empty = ""
   let append = (^)
 end
 
-implicit module Int32 = struct
-  type t = int32
+module List {A : Any} : Monoid with type t = A.t_for_any list = struct
+  type t = A.t_for_any list
 
-  (* Show *)
-  let to_string = Int32.to_string
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print ppf s = Format.pp_print_string ppf (to_string s)
+  (* Monoid *)
+  let empty = []
+  let append = (@)
+end
+
+implicit module Int32: sig
+  include Eq with type t = int32
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
+  type t = int32
 
   (* Eq *)
   let ( = ) (a : int32) b = a = b
 
   (* Ord *)
-  let compare = Int32.compare
+  let compare a b = Ord.translateCompare Int32.compare a b
 
   (* Num *)
   let zero = 0l
@@ -292,25 +281,22 @@ implicit module Int32 = struct
   (* Enum *)
   let succ = Int32.succ
   let pred = Int32.pred
-
-  (* Monoid, addition *)
-  let empty = 0l
-  let append = Int32.add
 end
 
-implicit module Int64 = struct
+implicit module Int64: sig
+  include Eq with type t = int64
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = int64
-
-  (* Show *)
-  let to_string = Int64.to_string
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print ppf i = Format.pp_print_string ppf (to_string i)
 
   (* Eq *)
   let ( = ) (a : int64) b = a = b
 
   (* Ord *)
-  let compare = Int64.compare
+  let compare a b = Ord.translateCompare Int64.compare a b
 
   (* Num *)
   let zero = 0L
@@ -328,29 +314,26 @@ implicit module Int64 = struct
   (* Enum *)
   let succ = Int64.succ
   let pred = Int64.pred
-
-  (* Monoid, addition *)
-  let empty = 0L
-  let append = Int64.add
 end
 
-implicit module Nativeint = struct
+implicit module Nativeint: sig
+  include Eq with type t = nativeint
+  include Ord with type t := t
+  include Num with type t := t
+  include Bounded with type t := t
+  include Enum with type t := t
+end = struct
   type t = nativeint
-
-  (* Show *)
-  let to_string = Nativeint.to_string
-  let buffer_add b i = Buffer.add_string b (to_string i)
-  let pp_print ppf i = Format.pp_print_string ppf (to_string i)
 
   (* Eq *)
   let ( = ) (a : nativeint) b = a = b
 
   (* Ord *)
-  let compare = Nativeint.compare
+  let compare a b = Ord.translateCompare Nativeint.compare a b
 
   (* Num *)
-  let zero = 0L
-  let one  = 1L
+  let zero = Nativeint.of_int 0
+  let one  = Nativeint.of_int 1
   let of_int = Nativeint.of_int
   let ( + ) = Nativeint.add
   let ( - ) = Nativeint.sub
@@ -364,8 +347,12 @@ implicit module Nativeint = struct
   (* Enum *)
   let succ = Nativeint.succ
   let pred = Nativeint.pred
+end
 
-  (* Monoid, addition *)
-  let empty = 0L
-  let append = Nativeint.add
+implicit module Unit: Monoid with type t = unit = struct
+  type t = unit
+
+  (* Monoid *)
+  let empty = ()
+  let append () () = ()
 end
