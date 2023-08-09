@@ -17,7 +17,8 @@ module type Ord = sig
 end
 
 module Ord = struct
-  let translateCompare (n : int) =
+  let translateCompare (compare : 'a -> 'a -> int) =
+    fun x y -> let n = compare x y in
     if n < 0 then LT
     else if n = 0 then EQ
     else (* if n > 0 then *) GT
@@ -121,7 +122,7 @@ end = struct
   let ( = ) (a : int) b = a = b
 
   (* Ord *)
-  let compare (a : int) b = Ord.translateCompare (compare a b)
+  let compare (a : int) b = Ord.translateCompare compare a b
 
   (* Num *)
   let zero = 0
@@ -153,7 +154,7 @@ end = struct
   let ( = ) (a : float) b = a = b
 
   (* Ord *)
-  let compare (a : float) b = Ord.translateCompare (compare a b)
+  let compare (a : float) b = Ord.translateCompare compare a b
 
   (* Num *)
   let zero = 0.
@@ -181,7 +182,7 @@ end = struct
   let ( = ) (a : bool) b = a = b
 
   (* Ord *)
-  let compare (a : bool) b = Ord.translateCompare (compare a b)
+  let compare (a : bool) b = Ord.translateCompare compare a b
 
   (* Bounded *)
   let bounds = (false, true)
@@ -208,7 +209,7 @@ end = struct
   let ( = ) (a : char) b = a = b
 
   (* Ord *)
-  let compare (a : char) b = Ord.translateCompare (compare a b)
+  let compare (a : char) b = Ord.translateCompare compare a b
 
   (* Bounded *)
   let bounds = ('\000', '\255')
@@ -234,7 +235,7 @@ end = struct
   let ( = ) (a : string) b = a = b
 
   (* Ord *)
-  let compare (a : string) b = Ord.translateCompare (compare a b)
+  let compare (a : string) b = Ord.translateCompare compare a b
 
   (* Monoid *)
   let empty = ""
@@ -262,7 +263,7 @@ end = struct
   let ( = ) (a : int32) b = a = b
 
   (* Ord *)
-  let compare a b = Ord.translateCompare (Int32.compare a b)
+  let compare a b = Ord.translateCompare Int32.compare a b
 
   (* Num *)
   let zero = 0l
@@ -295,7 +296,7 @@ end = struct
   let ( = ) (a : int64) b = a = b
 
   (* Ord *)
-  let compare a b = Ord.translateCompare (Int64.compare a b)
+  let compare a b = Ord.translateCompare Int64.compare a b
 
   (* Num *)
   let zero = 0L
@@ -328,7 +329,7 @@ end = struct
   let ( = ) (a : nativeint) b = a = b
 
   (* Ord *)
-  let compare a b = Ord.translateCompare (Nativeint.compare a b)
+  let compare a b = Ord.translateCompare Nativeint.compare a b
 
   (* Num *)
   let zero = Nativeint.of_int 0
