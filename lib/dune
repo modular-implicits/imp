@@ -1,4 +1,4 @@
 (library
  (public_name imp)
- (modules Any Control Data Scope Show Transformers Comonads)
+ (modules Any Comonads Control Data Scope Show Transformers)
  (synopsis "Experimental library using modular implicits"))

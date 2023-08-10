@@ -1,16 +1,16 @@
-open Control;;
-open Any;;
+open Any
+open Data
+open Control
 
 module type CoMonad = sig
   include Functor
   val extract : 'a t -> 'a
   val duplicate : 'a t -> 'a t t
-end;;
+end
 
 let extract {C : CoMonad} x = C.extract x
 let duplicate {C : CoMonad} x = C.duplicate x
 let extend {C : CoMonad} f x = C.fmap f (C.duplicate x)
-
 
 implicit module CoIdentity : sig 
 include Functor with type 'b t = 'b identity
@@ -23,8 +23,6 @@ end = struct
   let duplicate (Identity b) = Identity (Identity b)
 end 
 
-type 'b nonEmpty = NonEmpty of 'b * 'b list
-
 implicit module CoNonEmpty : sig 
   include Functor with type 'b t = 'b nonEmpty
   include CoMonad with type 'b t := 'b t
@@ -36,7 +34,6 @@ implicit module CoNonEmpty : sig
     let duplicate ((NonEmpty (b, bs)) : 'b nonEmpty) : 'b nonEmpty nonEmpty = NonEmpty (NonEmpty (b, bs), List.fmap (fun x -> NonEmpty (x, bs)) bs)
   end
 
-  
 implicit module CoPair {A : Any} : sig
 include Functor with type 'b t = A.t_for_any * 'b
 include CoMonad with type 'b t := 'b t

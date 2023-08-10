@@ -104,7 +104,8 @@ let () =
 
 
 let () = 
-  let open Imp in
   let open Imp.Comonads in
-  assert (5 = Comonads.extract (Control.Identity 5));
-  assert (10 = Comonads.extract  (Comonads.NonEmpty (10, [])))
+  let open Imp.Control in
+  let open Imp.Data in
+  assert (5 = extract (Identity 5));
+  assert (10 = extract  (NonEmpty (10, [])))
