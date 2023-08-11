@@ -119,3 +119,10 @@ let () =
   assert (runState test "hello" = (["goodbye!"], "goodbye"));
   let test = bind {S} (modify {S} (fun x -> x ^ "!") >> get {S}) (fun x -> return [x ^ "!"]) in
   assert (runState test "hello" = (["hello!!"], "hello!"))
+
+let () = 
+  let open Imp.Comonads in
+  let open Imp.Control in
+  let open Imp.Data in
+  assert (5 = extract (Identity 5));
+  assert (10 = extract  (NonEmpty (10, [])))

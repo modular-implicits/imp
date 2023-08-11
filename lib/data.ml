@@ -356,3 +356,5 @@ implicit module Unit: Monoid with type t = unit = struct
   let empty = ()
   let append () () = ()
 end
+
+type 'b nonEmpty = NonEmpty of 'b * 'b list
