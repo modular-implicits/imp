@@ -13,7 +13,7 @@ val runReaderT : {M : Monad} -> ('r, 'a M.t) readerT -> 'r -> 'a M.t
 val runReader : ('r, 'a) readerT -> 'r -> 'a
 (** Run a reader monad using the given read-only state value *)
 
-val lift : {M : Monad} -> 'a M.t -> ('r, 'a M.t) readerT
+val liftReader : {M : Monad} -> 'a M.t -> ('r, 'a M.t) readerT
 (** Lift a value from the inner monad m to the transformed monad, ('r 'a m) readerT *)
 
 module type MonadReader = sig
@@ -48,4 +48,54 @@ implicit module Reader {R : Any} : sig
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
   include MonadReader with type 'a t := 'a t and type r = R.t_for_any
+end
+
+type ('s, +'asm) stateT
+(** The State and StateT monads.
+    For StateT, transforming an inner monad m, use ('s, 'a m) stateT
+    For State, with no inner monad, use ('s 'a) stateT
+ *)
+
+val runStateT : {M : Monad} -> ('s, 'a M.t) stateT -> 's -> 'a M.t
+(** Run a stateT monad using the given initial state value.
+    Returns the computation's result, and the final state
+ *)
+
+val runState : ('s, 'a * 's) stateT -> 's -> 'a * 's
+(** Run a state monad using the given initial state value.
+    Returns the computation's result, and the final state
+ *)
+
+val liftState : {M : Monad} -> 'a M.t -> ('s, ('a * 's) M.t) stateT
+(** Lift a value from the inner monad m to the transformed monad, ('s 'a m) stateT *)
+
+module type MonadState = sig
+  include Monad
+  type s
+  val get : s t
+  val put : s -> unit t
+end
+(** MonadState allows the functions get and put
+    to be generalised to both state and stateT
+    (both those types implement MonadState)
+ *)
+
+val get : {M: MonadState} -> M.s M.t
+val put : {M: MonadState} -> M.s -> unit M.t
+val gets : {M: MonadState} -> (M.s -> 't) -> 't M.t
+val modify : {M : MonadState} -> (M.s -> M.s) -> unit M.t
+(** modify applies a given transformation to the state *)
+
+implicit module StateT {S : Any} {M : Monad} : sig
+  include Functor with type 'a t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include MonadState with type 'a t := 'a t and type s = S.t_for_any
+end
+
+implicit module State {S : Any} : sig
+  include Functor with type 'a t = (S.t_for_any, 'a * S.t_for_any) stateT
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include MonadState with type 'a t := 'a t and type s = S.t_for_any
 end
