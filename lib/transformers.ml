@@ -5,7 +5,6 @@ type ('r, 'am) readerT = ReaderT of ('r -> 'am)
 
 let runReaderT {M : Monad} (ReaderT f) = f
 let runReader (ReaderT r) = r
-let liftReader {M : Monad} m = ReaderT (fun _ -> m)
 
 module type MonadReader = sig
   include Monad
@@ -62,7 +61,6 @@ type ('s, 'asm) stateT = StateT of ('s -> 'asm)
 
 let runStateT {M : Monad} (StateT f) = f
 let runState (StateT s) = s
-let liftState {M : Monad} m = StateT (fun s -> M.fmap (fun x -> (x, s)) m)
 
 module type MonadState = sig
   include Monad
@@ -135,4 +133,30 @@ end = struct
   type s = S.t_for_any
   let get = StateT (fun s -> (s, s))
   let put s = StateT (fun _ -> ((), s))
+end
+
+module type MonadTrans = sig
+  module M : Monad
+  module MT : Monad
+  val lift : 'a M.t -> 'a MT.t
+end
+
+let lift {T: MonadTrans} = T.lift
+
+implicit module ReaderT_Trans {R: Any} {M: Monad}: MonadTrans
+  with type 'a MT.t = (R.t_for_any, 'a M.t) readerT
+  and type 'a M.t = 'a M.t
+= struct
+  module M = M
+  module MT = ReaderT {R} {M}
+  let lift m = ReaderT (fun _ -> m)
+end
+
+implicit module StateT_Trans {S: Any} {M: Monad}: MonadTrans
+  with type 'a MT.t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  and type 'a M.t = 'a M.t
+= struct
+  module M = M
+  module MT = StateT {S} {M}
+  let lift m = StateT (fun s -> M.fmap (fun x -> (x, s)) m)
 end
