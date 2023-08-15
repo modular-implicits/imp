@@ -96,12 +96,29 @@ let () =
   let module R = ReaderT {Any_String} {Option} in
   let test = bind {R} (ask {R}) (fun x -> return [x ^ "!"]) in
   assert (runReaderT {Option} test "hello" = Some ["hello!"]);
-  let test = bind {R} (ask {R}) (fun _ -> lift {Option} None) in
+  let test = bind {R} (ask {R}) (fun _ -> lift None) in
   assert (runReaderT {Option} test "hello" = None);
   let module R = Reader {Any_String} in
   let test = bind {R} (ask {R}) (fun x -> return [x ^ "!"]) in
   assert (runReader test "hello" = ["hello!"])
 
+let () =
+  let open Imp.Any in
+  let open Imp.Control in
+  let open Imp.Transformers in
+  let module S = StateT {Any_String} {Option} in
+  let test = bind {S} (get {S}) (fun x -> return [x ^ "!"]) in
+  assert (runStateT {Option} test "hello" = Some (["hello!"], "hello"));
+  let test = bind {S} (get {S}) (fun _ -> lift None) in
+  assert (runStateT {Option} test "hello" = None);
+  let module S = State {Any_String} in
+  let test = bind {S} (get {S}) (fun x -> return [x ^ "!"]) in
+  assert (runState test "hello" = (["hello!"], "hello"));
+  let (>>) {M: Monad} x y = M.bind x (fun _ -> y) in
+  let test = bind {S} (put {S} "goodbye" >> get {S}) (fun x -> return [x ^ "!"]) in
+  assert (runState test "hello" = (["goodbye!"], "goodbye"));
+  let test = bind {S} (modify {S} (fun x -> x ^ "!") >> get {S}) (fun x -> return [x ^ "!"]) in
+  assert (runState test "hello" = (["hello!!"], "hello!"))
 
 let () = 
   let open Imp.Comonads in
