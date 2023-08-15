@@ -130,8 +130,9 @@ let () =
 let () =
   let open Imp.Any in
   let open Imp.Data in
-  let e : int first = Monoid.empty {First {Any_Int}} () in
+  let open Monoid in
+  let e : int first = empty {First {Any_Int}} () in
   assert (e = { first = None });
-  assert (Monoid.append e e = e);
-  assert (Monoid.append {First {Any_Int}} { first = Some 2 } e = { first = Some 2 });
-  assert (Monoid.append {First {Any_Int}} { first = Some 2 } { first = Some 3 } = { first = Some 2 })
+  assert (append e e = e);
+  assert (append {First {Any_Int}} { first = Some 2 } e = { first = Some 2 });
+  assert (append {First {Any_Int}} { first = Some 2 } { first = Some 3 } = { first = Some 2 })
