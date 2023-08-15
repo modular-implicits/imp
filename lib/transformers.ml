@@ -18,12 +18,12 @@ let local {M : MonadReader} = M.local
 let ask {M : MonadReader} = asks (fun r -> r)
 
 implicit module ReaderT {R : Any} {M : Monad} : sig
-  include Functor with type 'a t = (R.t_for_any, 'a M.t) readerT
+  include Functor with type 'a t = (R.t, 'a M.t) readerT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadReader with type 'a t := 'a t and type r = R.t_for_any
+  include MonadReader with type 'a t := 'a t and type r = R.t
 end = struct
-  type 'a t = (R.t_for_any, 'a M.t) readerT
+  type 'a t = (R.t, 'a M.t) readerT
   (* Functor *)
   let fmap f (ReaderT m) = ReaderT (fun r -> fmap {M} f (m r))
   (* Applicative *)
@@ -32,18 +32,18 @@ end = struct
   (* Monad *)
   let bind (ReaderT fx) ff = ReaderT (fun r -> bind {M} (fx r) (fun a -> runReaderT {M} (ff a) r))
   (* MonadReader *)
-  type r = R.t_for_any
+  type r = R.t
   let asks f = ReaderT (fun r -> M.return (f r))
   let local f (ReaderT g) = ReaderT (fun r -> g (f r))
 end
 
 implicit module Reader {R : Any} : sig
-  include Functor with type 'a t = (R.t_for_any, 'a) readerT
+  include Functor with type 'a t = (R.t, 'a) readerT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadReader with type 'a t := 'a t and type r = R.t_for_any
+  include MonadReader with type 'a t := 'a t and type r = R.t
 end = struct
-  type 'a t = (R.t_for_any, 'a) readerT
+  type 'a t = (R.t, 'a) readerT
   (* Functor *)
   let fmap f (ReaderT m) = ReaderT (fun r -> f (m r))
   (* Applicative *)
@@ -52,7 +52,7 @@ end = struct
   (* Monad *)
   let bind (ReaderT fx) ff = ReaderT (fun r -> runReader (ff (fx r)) r)
   (* MonadReader *)
-  type r = R.t_for_any
+  type r = R.t
   let asks f = ReaderT f
   let local f (ReaderT g) = ReaderT (fun r -> g (f r))
 end
@@ -70,12 +70,12 @@ module type MonadState = sig
 end
 
 implicit module StateT {S : Any} {M : Monad} : sig
-  include Functor with type 'a t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  include Functor with type 'a t = (S.t, ('a * S.t) M.t) stateT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadState with type 'a t := 'a t and type s = S.t_for_any
+  include MonadState with type 'a t := 'a t and type s = S.t
 end = struct
-  type 'a t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  type 'a t = (S.t, ('a * S.t) M.t) stateT
   (* Functor *)
   let fmap (f: 'a -> 'b) (StateT m: 'a t): 'b t = StateT (
     fun s -> M.fmap (fun (x, s') -> (f x, s')) (m s)
@@ -93,7 +93,7 @@ end = struct
     fun (a, s') -> runStateT {M} (ff a) s'
   )
   (* MonadState *)
-  type s = S.t_for_any
+  type s = S.t
   let get = StateT (fun s -> M.return (s, s))
   let put s = StateT (fun _ -> M.return ((), s))
 end
@@ -105,12 +105,12 @@ let gets {M: MonadState} f = fmap f M.get
 let modify {M: MonadState} f = bind M.get (fun s -> M.put (f s))
 
 implicit module State {S : Any} : sig
-  include Functor with type 'a t = (S.t_for_any, 'a * S.t_for_any) stateT
+  include Functor with type 'a t = (S.t, 'a * S.t) stateT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadState with type 'a t := 'a t and type s = S.t_for_any
+  include MonadState with type 'a t := 'a t and type s = S.t
 end = struct
-  type 'a t = (S.t_for_any, 'a * S.t_for_any) stateT
+  type 'a t = (S.t, 'a * S.t) stateT
   (* Functor *)
   let fmap (f: 'a -> 'b) (StateT m: 'a t): 'b t = StateT (
     fun s ->
@@ -130,7 +130,7 @@ end = struct
     runState (ff a) s'
   )
   (* MonadState *)
-  type s = S.t_for_any
+  type s = S.t
   let get = StateT (fun s -> (s, s))
   let put s = StateT (fun _ -> ((), s))
 end
@@ -144,7 +144,7 @@ end
 let lift {T: MonadTrans} = T.lift
 
 implicit module ReaderT_Trans {R: Any} {M: Monad}: MonadTrans
-  with type 'a MT.t = (R.t_for_any, 'a M.t) readerT
+  with type 'a MT.t = (R.t, 'a M.t) readerT
   and type 'a M.t = 'a M.t
 = struct
   module M = M
@@ -153,7 +153,7 @@ implicit module ReaderT_Trans {R: Any} {M: Monad}: MonadTrans
 end
 
 implicit module StateT_Trans {S: Any} {M: Monad}: MonadTrans
-  with type 'a MT.t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  with type 'a MT.t = (S.t, ('a * S.t) M.t) stateT
   and type 'a M.t = 'a M.t
 = struct
   module M = M

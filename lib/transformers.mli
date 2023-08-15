@@ -34,17 +34,17 @@ val ask : {M : MonadReader} -> M.r M.t
 (** ask reads the state of the monad *)
 
 implicit module ReaderT {R : Any} {M : Monad} : sig
-  include Functor with type 'a t = (R.t_for_any, 'a M.t) readerT
+  include Functor with type 'a t = (R.t, 'a M.t) readerT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadReader with type 'a t := 'a t and type r = R.t_for_any
+  include MonadReader with type 'a t := 'a t and type r = R.t
 end
 
 implicit module Reader {R : Any} : sig
-  include Functor with type 'a t = (R.t_for_any, 'a) readerT
+  include Functor with type 'a t = (R.t, 'a) readerT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadReader with type 'a t := 'a t and type r = R.t_for_any
+  include MonadReader with type 'a t := 'a t and type r = R.t
 end
 
 type ('s, +'asm) stateT
@@ -81,17 +81,17 @@ val modify : {M : MonadState} -> (M.s -> M.s) -> unit M.t
 (** modify applies a given transformation to the state *)
 
 implicit module StateT {S : Any} {M : Monad} : sig
-  include Functor with type 'a t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  include Functor with type 'a t = (S.t, ('a * S.t) M.t) stateT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadState with type 'a t := 'a t and type s = S.t_for_any
+  include MonadState with type 'a t := 'a t and type s = S.t
 end
 
 implicit module State {S : Any} : sig
-  include Functor with type 'a t = (S.t_for_any, 'a * S.t_for_any) stateT
+  include Functor with type 'a t = (S.t, 'a * S.t) stateT
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
-  include MonadState with type 'a t := 'a t and type s = S.t_for_any
+  include MonadState with type 'a t := 'a t and type s = S.t
 end
 
 module type MonadTrans = sig
@@ -111,10 +111,10 @@ val lift : {T: MonadTrans} -> 'a T.M.t -> 'a T.MT.t
  *)
 
 implicit module ReaderT_Trans {R: Any} {M: Monad}: MonadTrans
-  with type 'a MT.t = (R.t_for_any, 'a M.t) readerT
+  with type 'a MT.t = (R.t, 'a M.t) readerT
   and type 'a M.t = 'a M.t
 
 implicit module StateT_Trans {S: Any} {M: Monad}: MonadTrans
-  with type 'a MT.t = (S.t_for_any, ('a * S.t_for_any) M.t) stateT
+  with type 'a MT.t = (S.t, ('a * S.t) M.t) stateT
   and type 'a M.t = 'a M.t
 

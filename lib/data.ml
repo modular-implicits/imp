@@ -111,9 +111,9 @@ end
 
 (* Instances *)
 
-implicit module First {A: Any} : Monoid with type t = A.t_for_any Monoid.first = struct
+implicit module First {A: Any} : Monoid with type t = A.t Monoid.first = struct
   open Monoid
-  type t = A.t_for_any first
+  type t = A.t first
   let empty = { first = None }
   let append x y = match x with
     | { first = Some _ } -> x
@@ -253,8 +253,8 @@ end = struct
   let append = (^)
 end
 
-module List {A : Any} : Monoid with type t = A.t_for_any list = struct
-  type t = A.t_for_any list
+module List {A : Any} : Monoid with type t = A.t list = struct
+  type t = A.t list
 
   (* Monoid *)
   let empty = []

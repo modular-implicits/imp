@@ -35,10 +35,10 @@ implicit module CoNonEmpty : sig
   end
 
 implicit module CoPair {A : Any} : sig
-include Functor with type 'b t = A.t_for_any * 'b
+include Functor with type 'b t = A.t * 'b
 include CoMonad with type 'b t := 'b t
 end = struct
-  type 'b t = A.t_for_any * 'b
+  type 'b t = A.t * 'b
   let fmap f (a, b) = (a, f b)
   let extract (_, b) = b
   let duplicate (a, b) = (a, (a, b))
