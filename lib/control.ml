@@ -180,11 +180,11 @@ end = struct
 end
 
 implicit module Function {A : Any} : sig
-  include Functor with type 'b t = A.t_for_any -> 'b
+  include Functor with type 'b t = A.t -> 'b
   include Applicative with type 'b t := 'b t
   include Monad with type 'b t := 'b t
 end = struct
-  type 'b t = A.t_for_any -> 'b
+  type 'b t = A.t -> 'b
 
   (* Functor *)
   let fmap m f x = m (f x)
@@ -198,8 +198,8 @@ end = struct
 end
 (** (a -> b) is an instance of Monad b - it behaves like the reader monad *)
 
-implicit module Pair {A : Any} : Functor with type 'b t = A.t_for_any * 'b = struct
-  type 'b t = A.t_for_any * 'b
+implicit module Pair {A : Any} : Functor with type 'b t = A.t * 'b = struct
+  type 'b t = A.t * 'b
 
   let fmap m (a, b) = (a, m b)
 end
@@ -207,9 +207,9 @@ end
 type ('a, 'b) const = Const of 'a
 
 implicit module Const {A : Any}: sig
-  include Functor with type 'b t = (A.t_for_any, 'b) const
+  include Functor with type 'b t = (A.t, 'b) const
 end = struct
-  type 'b t = (A.t_for_any, 'b) const
+  type 'b t = (A.t, 'b) const
   let fmap _ (Const x) = (Const x)
 end
 
