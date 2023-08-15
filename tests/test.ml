@@ -126,3 +126,13 @@ let () =
   let open Imp.Data in
   assert (5 = extract (Identity 5));
   assert (10 = extract  (NonEmpty (10, [])))
+
+let () =
+  let open Imp.Any in
+  let open Imp.Data in
+  let open Monoid in
+  let e : int first = empty {First {Any_Int}} () in
+  assert (e = { first = None });
+  assert (append e e = e);
+  assert (append {First {Any_Int}} { first = Some 2 } e = { first = Some 2 });
+  assert (append {First {Any_Int}} { first = Some 2 } { first = Some 3 } = { first = Some 2 })
