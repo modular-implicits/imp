@@ -223,6 +223,8 @@ end
 
 type 'b identity = Identity of 'b
 
+let runIdentity (Identity x) = x
+
 implicit module Identity: sig
   include Functor with type 'b t = 'b identity
   include Applicative with type 'b t := 'b t
