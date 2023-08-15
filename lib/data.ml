@@ -358,3 +358,13 @@ implicit module Unit: Monoid with type t = unit = struct
 end
 
 type 'b nonEmpty = NonEmpty of 'b * 'b list
+
+type 'a first = { first: 'a option }
+
+implicit module First {A: Any} : Monoid with type t = A.t_for_any first = struct
+  type t = A.t_for_any first
+  let empty = { first = None }
+  let append x y = match x with
+    | { first = Some _ } -> x
+    | { first = None } -> y
+end
