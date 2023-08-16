@@ -99,7 +99,7 @@ let () =
   let test = bind {R} (ask {R}) (fun _ -> lift None) in
   assert (runReaderT {Option} test "hello" = None);
   let module R = Reader {Any_String} in
-  let test = bind {R} (ask {R}) (fun x -> return [x ^ "!"]) in
+  let test = bind {R} (ask {R}) (fun x -> return {R} [x ^ "!"]) in
   assert (runReader test "hello" = ["hello!"])
 
 let () =
