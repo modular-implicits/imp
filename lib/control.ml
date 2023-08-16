@@ -98,9 +98,7 @@ module type Traversable = sig
                  ('a -> 'b F.t) -> 'a t -> 'b t F.t
 end
 
-module Traversable = struct
-  let traverse {T : Traversable} = T.traverse
-end
+let traverse {T : Traversable} = T.traverse
 
 implicit module Option: sig
   include Functor with type 'a t = 'a option
