@@ -54,6 +54,31 @@ module Num = struct
   let (~- )  {M : Num} = M.(~- )
 end
 
+module type Fractional = sig
+include Num
+val ( / ) : t -> t -> t
+end
+
+module type Floating = sig 
+include Num 
+  val pi : t
+  val exp : t -> t
+  val log : t -> t
+  val sin : t -> t
+  val cos : t -> t
+  val asin : t -> t
+  val acos : t -> t
+  val atan : t -> t
+  val sinh : t -> t
+  val cosh : t -> t
+  val asinh : t -> t
+  val acosh : t -> t
+  val atanh : t -> t
+end
+
+
+
+
 module type Bounded = sig
   type t
   val bounds : t * t
