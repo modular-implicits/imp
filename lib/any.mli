@@ -21,3 +21,4 @@ implicit module Any_List {A : Any} : Any with type t = A.t list
 implicit module Any_Pair {A : Any} {B : Any} : Any with type t = A.t * B.t
 implicit module Any_Function {A : Any} {B : Any} : Any with type t = A.t -> B.t
 implicit module Any_Exn : Any with type t = exn
+implicit module Any_Option {A : Any} : Any with type t = A.t option

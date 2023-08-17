@@ -67,3 +67,8 @@ implicit module Any_Exn = struct
   type t = exn
   let __any__ = ()
 end
+
+implicit module Any_Option {A : Any} = struct
+  type t = A.t option
+  let __any__ = ()
+end
