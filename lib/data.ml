@@ -61,7 +61,7 @@ val ( / ) : t -> t -> t
 end
 
 module Fractional = struct
-  let of_fractional   {M : Fractional} () = M.of_fractional
+  let of_fractional {M : Fractional} = M.of_fractional
   let ( / )  {M : Fractional} = M.( / )
 end
 
