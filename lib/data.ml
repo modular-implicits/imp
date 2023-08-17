@@ -56,6 +56,7 @@ end
 
 module type Fractional = sig
 include Num
+val of_fractional : float -> t
 val ( / ) : t -> t -> t
 end
 
