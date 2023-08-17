@@ -77,9 +77,11 @@ include Num
   val atan : t -> t
   val sinh : t -> t
   val cosh : t -> t
+  (*
   val asinh : t -> t
   val acosh : t -> t
   val atanh : t -> t
+  *)
 end
 
 module Floating = struct
@@ -93,9 +95,11 @@ module Floating = struct
   let atan {M : Floating} = M.atan
   let sinh {M : Floating} = M.sinh
   let cosh {M : Floating} = M.cosh
+  (*
   let asinh {M : Floating} = M.asinh
   let acosh {M : Floating} = M.acosh
   let atanh {M : Floating} = M.atanh
+  *)
 end
 
 
@@ -203,6 +207,8 @@ implicit module Float: sig
   include Ord with type t := t
   include Num with type t := t
   include Bounded with type t := t
+  include Fractional with type t := t
+  include Floating with type t := t
 end = struct
   type t = float
 
@@ -224,6 +230,31 @@ end = struct
 
   (* Bounded *)
   let bounds = (neg_infinity, infinity)
+
+  (* Fractional *)
+
+  let of_fractional x = x
+  let ( / ) = ( /. )
+
+  (* Floating *)
+
+  let pi = 4. *. atan 1.
+  let exp = exp
+  let log = log
+  let sin = sin
+  let cos = cos
+  let asin = asin
+  let acos = acos
+  let atan = atan
+  let sinh = sinh
+  let cosh = cosh
+
+
+  
+
+
+
+
 end
 
 implicit module Bool: sig
