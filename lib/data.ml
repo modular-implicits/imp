@@ -60,6 +60,11 @@ val of_fractional : float -> t
 val ( / ) : t -> t -> t
 end
 
+module Fractional = struct
+  let of_fractional   {M : Fractional} () = M.of_fractional
+  let ( / )  {M : Fractional} = M.( / )
+end
+
 module type Floating = sig 
 include Num 
   val pi : t
@@ -77,7 +82,21 @@ include Num
   val atanh : t -> t
 end
 
-
+module Floating = struct
+  let pi {M : Floating} = M.pi
+  let exp {M : Floating} = M.exp
+  let log {M : Floating} = M.log
+  let sin {M : Floating} = M.sin
+  let cos {M : Floating} = M.cos
+  let asin {M : Floating} = M.asin
+  let acos {M : Floating} = M.acos
+  let atan {M : Floating} = M.atan
+  let sinh {M : Floating} = M.sinh
+  let cosh {M : Floating} = M.cosh
+  let asinh {M : Floating} = M.asinh
+  let acosh {M : Floating} = M.acosh
+  let atanh {M : Floating} = M.atanh
+end
 
 
 module type Bounded = sig
