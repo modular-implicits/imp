@@ -85,7 +85,7 @@ include Num
 end
 
 module Floating = struct
-  let pi {M : Floating} = M.pi
+  let pi {M : Floating}= M.pi
   let exp {M : Floating} = M.exp
   let log {M : Floating} = M.log
   let sin {M : Floating} = M.sin
@@ -248,12 +248,6 @@ end = struct
   let atan = atan
   let sinh = sinh
   let cosh = cosh
-
-
-  
-
-
-
 
 end
 

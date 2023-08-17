@@ -11,6 +11,21 @@ let () =
     assert (z = 36.0);
   end
 
+let () =
+  let open Imp.Data.Fractional in
+  let open Imp.Data.Floating in
+  let open Imp.Data.Num in
+  let open implicit Imp.Data in
+  let open Imp.Data in
+  begin
+    let x = 5. in
+    assert (1. = (x / x));
+    let y = 3.1415 in 
+    let x = (pi {Float}) in
+    assert ( 0.1 > 6.29 - (y + x));
+end
+
+
     
 let () =
   begin
