@@ -12,7 +12,6 @@ let () =
   end
 
 let () =
-  let open Imp.Data.Fractional in
   let open Imp.Data.Floating in
   let open Imp.Data.Num in
   let open implicit Imp.Data in

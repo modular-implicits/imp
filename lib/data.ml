@@ -66,7 +66,7 @@ module Fractional = struct
 end
 
 module type Floating = sig 
-include Num 
+include Fractional
   val pi : t
   val exp : t -> t
   val log : t -> t
