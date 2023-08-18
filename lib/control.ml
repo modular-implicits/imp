@@ -7,6 +7,7 @@ module type Functor = sig
 end;;
 
 let fmap {F : Functor} = F.fmap;;
+let fmapG {F : Functor} = F.fmap;;
 
 module type Applicative = sig
   include Functor
@@ -15,7 +16,9 @@ module type Applicative = sig
 end;;
 
 let return {M : Applicative} = M.return;;
+let returnG {M : Applicative} = M.return;;
 let apply {M : Applicative} = M.apply;;
+let applyG {M : Applicative} = M.apply;;
 
 module type Monad = sig
   include Applicative
@@ -23,11 +26,15 @@ module type Monad = sig
 end;;
 
 let bind {M : Monad} = M.bind;;
+let bindG {M : Monad} = M.bind;;
+
 
 (* Convenience functions *)
 
 let pure {M : Monad} = M.return;;
+let pureG {M : Monad} = M.return;;
 let (>>=) {M : Monad} = M.bind;;
+let (>>=..) {M : Monad} = M.bind;;
 
 (* Define polymorphic monad functions *)
 
@@ -74,13 +81,16 @@ end
 
 module Monad_plus = struct
   let mzero {M : Monad_plus} = M.mzero
+  let mzeroG {M : Monad_plus} = M.mzero
   let mplus {M : Monad_plus} = M.mplus
+  let mplusG {M : Monad_plus} = M.mplus
 
   let mguard {M : Monad_plus} b =
     if b then
       M.return ()
     else
       M.mzero
+  let mguardG {M : Monad_plus} = mguard
 end
 
 module type Foldable = sig
@@ -90,6 +100,7 @@ end
 
 module Foldable = struct
   let fold {F : Foldable} = F.fold
+  let foldG {F : Foldable} = F.fold
 end
 
 module type Traversable = sig
@@ -99,6 +110,8 @@ module type Traversable = sig
 end
 
 let traverse {T : Traversable} = T.traverse
+let traverseG {T : Traversable} = T.traverse
+
 
 implicit module Option: sig
   include Functor with type 'a t = 'a option

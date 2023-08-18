@@ -45,13 +45,21 @@ end
 
 module Num = struct
   let zero   {M : Num} () = M.zero
+  let zeroG {M : Num} () = M.zero
   let one    {M : Num} () = M.one
+  let oneG   {M : Num} () = M.one
   let of_int {M : Num} = M.of_int
+  let of_intG {M : Num} = M.of_int
   let ( + )  {M : Num} = M.( + )
+  let ( +@ )  {M : Num} = M.( + )
   let ( - )  {M : Num} = M.( - )
+  let ( -@ )  {M : Num} = M.( - )
   let ( * )  {M : Num} = M.( * )
+  let ( *@ )  {M : Num} = M.( * )
   let ( / )  {M : Num} = M.( / )
+  let ( /@ )  {M : Num} = M.( / )
   let (~- )  {M : Num} = M.(~- )
+  let (~-@ )  {M : Num} = M.(~- )
 end
 
 module type Fractional = sig
@@ -62,7 +70,9 @@ end
 
 module Fractional = struct
   let of_fractional {M : Fractional} = M.of_fractional
+  let of_fractionalG {M : Fractional} = M.of_fractional
   let fdiv  {M : Fractional} = M.fdiv
+  let fdivG  {M : Fractional} = M.fdiv
 end
 
 module type Floating = sig 
@@ -86,15 +96,25 @@ end
 
 module Floating = struct
   let pi {M : Floating}= M.pi
+  let piG {M : Floating} = M.pi
   let exp {M : Floating} = M.exp
+  let expG {M : Floating} = M.exp
   let log {M : Floating} = M.log
+  let logG {M : Floating} = M.log
   let sin {M : Floating} = M.sin
+  let sinG {M : Floating} = M.sin
   let cos {M : Floating} = M.cos
+  let cosG {M : Floating} = M.cos
   let asin {M : Floating} = M.asin
+  let asinG {M : Floating} = M.asin
   let acos {M : Floating} = M.acos
+  let acosG {M : Floating} = M.acos
   let atan {M : Floating} = M.atan
+  let atanG {M : Floating} = M.atan
   let sinh {M : Floating} = M.sinh
+  let sinhG {M : Floating} = M.sinh
   let cosh {M : Floating} = M.cosh
+  let coshG {M : Floating} = M.cosh
   (*
   let asinh {M : Floating} = M.asinh
   let acosh {M : Floating} = M.acosh
@@ -110,6 +130,7 @@ end
 
 module Bounded = struct
   let bounds {M : Bounded} () = M.bounds
+  let boundsG {M : Bounded} () = M.bounds
 end
 
 module type Enum = sig
@@ -120,7 +141,9 @@ end
 
 module Enum = struct
   let succ {M : Enum} x = M.succ x
+  let succG {M : Enum} x = M.succ x
   let pred {M : Enum} x = M.pred x
+  let predG {M : Enum} x = M.pred x
 
   let rec fold_enum_to
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
@@ -129,6 +152,7 @@ module Enum = struct
       fold_enum_to (M.succ a) b f (f a acc)
     else
       acc
+   let fold_enum_to : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a = fold_enum_to
 
   let rec fold_enum_downto
     : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a
@@ -137,12 +161,17 @@ module Enum = struct
       fold_enum_downto (M.pred a) b f (f a acc)
     else
       acc
+  let fold_enum_downto : {M : Enum} -> M.t -> M.t -> (M.t -> 'a -> 'a) -> 'a -> 'a = fold_enum_downto
 
   let list_enum_to {M : Enum} (a : M.t) b =
     List.rev (fold_enum_to a b (fun x acc -> x :: acc) [])
+  
+  let list_enum_to {M : Enum} = list_enum_to {M}
 
   let list_enum_downto {M : Enum} (a : M.t) b =
     List.rev (fold_enum_downto a b (fun x acc -> x :: acc) [])
+  
+  let list_enum_downto {M : Enum} = list_enum_downto {M}
 end
 
 module type Monoid = sig
@@ -153,7 +182,9 @@ end
 
 module Monoid = struct
   let empty {M : Monoid} () = M.empty
+  let emptyG {M : Monoid} () = M.empty
   let append {M : Monoid} = M.append
+  let appendG {M : Monoid} = M.append
 
   type 'a first = { first: 'a option }
 end
