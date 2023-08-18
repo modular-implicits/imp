@@ -54,6 +54,55 @@ module Num = struct
   let (~- )  {M : Num} = M.(~- )
 end
 
+module type Fractional = sig
+include Num
+val of_fractional : float -> t
+val fdiv : t -> t -> t
+end
+
+module Fractional = struct
+  let of_fractional {M : Fractional} = M.of_fractional
+  let fdiv  {M : Fractional} = M.fdiv
+end
+
+module type Floating = sig 
+include Num 
+  val pi : t
+  val exp : t -> t
+  val log : t -> t
+  val sin : t -> t
+  val cos : t -> t
+  val asin : t -> t
+  val acos : t -> t
+  val atan : t -> t
+  val sinh : t -> t
+  val cosh : t -> t
+  (*
+  val asinh : t -> t
+  val acosh : t -> t
+  val atanh : t -> t
+  *)
+end
+
+module Floating = struct
+  let pi {M : Floating}= M.pi
+  let exp {M : Floating} = M.exp
+  let log {M : Floating} = M.log
+  let sin {M : Floating} = M.sin
+  let cos {M : Floating} = M.cos
+  let asin {M : Floating} = M.asin
+  let acos {M : Floating} = M.acos
+  let atan {M : Floating} = M.atan
+  let sinh {M : Floating} = M.sinh
+  let cosh {M : Floating} = M.cosh
+  (*
+  let asinh {M : Floating} = M.asinh
+  let acosh {M : Floating} = M.acosh
+  let atanh {M : Floating} = M.atanh
+  *)
+end
+
+
 module type Bounded = sig
   type t
   val bounds : t * t
@@ -158,6 +207,8 @@ implicit module Float: sig
   include Ord with type t := t
   include Num with type t := t
   include Bounded with type t := t
+  include Fractional with type t := t
+  include Floating with type t := t
 end = struct
   type t = float
 
@@ -179,6 +230,25 @@ end = struct
 
   (* Bounded *)
   let bounds = (neg_infinity, infinity)
+
+  (* Fractional *)
+
+  let of_fractional x = x
+  let fdiv = ( /. )
+
+  (* Floating *)
+
+  let pi = 4. *. atan 1.
+  let exp = exp
+  let log = log
+  let sin = sin
+  let cos = cos
+  let asin = asin
+  let acos = acos
+  let atan = atan
+  let sinh = sinh
+  let cosh = cosh
+
 end
 
 implicit module Bool: sig
