@@ -18,8 +18,7 @@ let return {M : Applicative} = M.return;;
 let apply {M : Applicative} = M.apply;;
 
 let liftA2 {M : Applicative} (f : 'a -> 'b -> 'c) (x : 'a M.t) (y : 'b M.t) : 'c M.t = M.apply (M.fmap f x) y;;
-let liftA3 {M : Applicative} (f : 'a -> 'b -> 'c -> 'd) (x : 'a M.t) (y : 'b M.t) (z : 'c M.t) : 'd M.t = 
-                                                                                        M.apply (M.apply (M.fmap f x) y) z;;
+let liftA3 {M : Applicative} (f : 'a -> 'b -> 'c -> 'd) (x : 'a M.t) (y : 'b M.t) (z : 'c M.t) : 'd M.t = M.apply (liftA2 {M} f x y) z;;
 
 
 module type Monad = sig
