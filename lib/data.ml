@@ -57,12 +57,12 @@ end
 module type Fractional = sig
 include Num
 val of_fractional : float -> t
-val fdiv : t -> t -> t
+val (/.) : t -> t -> t
 end
 
 module Fractional = struct
   let of_fractional {M : Fractional} = M.of_fractional
-  let fdiv  {M : Fractional} = M.fdiv
+  let (/.)  {M : Fractional} = M.(/.)
 end
 
 module type Floating = sig 
@@ -236,7 +236,7 @@ end = struct
   (* Fractional *)
 
   let of_fractional x = x
-  let fdiv = ( /. )
+  let (/.) = ( /. )
 
   (* Floating *)
 
