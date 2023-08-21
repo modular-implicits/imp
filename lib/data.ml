@@ -68,6 +68,7 @@ end
 module type Floating = sig 
 include Num 
   val pi : t
+  val sqrt : t -> t
   val exp : t -> t
   val log : t -> t
   val sin : t -> t
@@ -86,6 +87,7 @@ end
 
 module Floating = struct
   let pi {M : Floating}= M.pi
+  let sqrt {M : Floating} = M.sqrt
   let exp {M : Floating} = M.exp
   let log {M : Floating} = M.log
   let sin {M : Floating} = M.sin
@@ -239,6 +241,7 @@ end = struct
   (* Floating *)
 
   let pi = 4. *. atan 1.
+  let sqrt = fun x -> x ** 0.5
   let exp = exp
   let log = log
   let sin = sin
