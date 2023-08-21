@@ -11,6 +11,16 @@ let () =
     assert (z = 36.0);
   end
 
+  let () = 
+    let open Imp.Control in 
+    let x = Some 5 in 
+    let y = Some 10 in 
+    begin
+    assert ((Some 15) = liftA2 ( + ) x y);
+    assert (None = liftA2 ( + ) x None);
+    end
+
+
 let () =
   let open Imp.Data.Fractional in
   let open Imp.Data.Floating in
