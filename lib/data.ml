@@ -67,6 +67,7 @@ end
 
 module type Floating = sig 
 include Num 
+include Fractional
   val pi : t
   val sqrt : t -> t
   val exp : t -> t
