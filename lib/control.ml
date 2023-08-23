@@ -238,3 +238,20 @@ end = struct
   let apply (Identity f) (Identity x) = Identity (f x)
   let bind (Identity x) f = f x
 end
+
+type 'a pair = Pair of 'a * 'a
+
+let fst (Pair (x, _)) = x
+let snd (Pair (_, y)) = y
+
+implicit module PairSame : sig 
+  include Functor with type 'a t = 'a pair
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+end = struct
+  type 'a t = 'a pair
+  let fmap f (Pair (x, y)) = Pair (f x, f y)
+  let return x = Pair (x, x)
+  let apply (Pair (f, g)) (Pair (x, y)) = Pair (f x, g y)
+  let bind (Pair (x, y)) f = Pair (fst (f x), snd (f y))
+end
