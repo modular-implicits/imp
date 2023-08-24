@@ -28,8 +28,6 @@ end;;
 
 let bind {M : Monad} = M.bind;;
 
-let liftM {M : Monad} (f : 'a -> 'b) (m : 'a M.t) : 'b M.t = M.bind m (fun x -> M.return (f x))
-
 (* Convenience functions *)
 
 let pure {M : Monad} = M.return;;
