@@ -76,6 +76,13 @@ module type Monad_plus = sig
   val mplus : 'a t -> 'a t -> 'a t
 end
 
+module type Monad_fix = sig 
+  include Monad 
+  val mfix : ('a -> 'a t) -> 'a t
+end
+
+let mfix {M : Monad_fix} = M.mfix
+
 module Monad_plus = struct
   let mzero {M : Monad_plus} = M.mzero
   let mplus {M : Monad_plus} = M.mplus
@@ -147,6 +154,7 @@ implicit module Option: sig
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
   include Monad_plus with type 'a t := 'a t
+  include Monad_fix with type 'a t := 'a t
   include Foldable with type 'a t := 'a t
   include Traversable with type 'a t := 'a t
 end = struct
@@ -174,6 +182,14 @@ end = struct
     | None -> b
     | Some _ -> a
 
+  let mfix (f : ('a -> 'a option)) : 'a option = 
+    let rec loop x = 
+      match f x with
+      | None -> raise (Failure "Reached None")
+      | Some x' -> if x = x' then Some x else loop x'
+    in loop (Obj.magic ())
+
+
   (* Foldable *)
   let fold f t acc = match t with
     | None -> acc
@@ -185,11 +201,16 @@ end = struct
     | Some x -> F.fmap (fun x -> Some x) (f x)
 end
 
+let fix (f : 'a -> 'a) : 'a = 
+  let rec loop x = let x' = f x in
+     if x = x' then x else loop x' in loop (Obj.magic ())
+
 implicit module List : sig
   include Functor with type 'a t = 'a list
   include Applicative with type 'a t := 'a t
   include Monad with type 'a t := 'a t
   include Monad_plus with type 'a t := 'a t
+  include Monad_fix with type 'a t := 'a t
   include Foldable with type 'a t := 'a t
   include Traversable with type 'a t := 'a t
 end = struct
@@ -209,6 +230,14 @@ end = struct
   (* Monad_plus *)
   let mzero = []
   let mplus = (@)
+
+  let head (x::_) = x
+  let tail (_::xs) = xs
+
+  (* Monad_fix *)
+  let rec mfix (f : 'a -> 'a list) : 'a list = match fix (fun x -> f (head x)) with 
+    | [] -> []
+    | (x::_) -> x :: mfix (fun x -> tail (f x))
 
   (* Foldable *)
   let fold f xs a = List.fold_left (fun x y -> f y x) a xs
@@ -235,6 +264,8 @@ end = struct
 
   (* Monad *)
   let bind g f x = f (g x) x
+
+  let liftM {M : Monad} (f : 'a -> 'b) (m : 'a M.t) : 'b M.t = M.bind m (fun x -> M.return (f x))
 end
 (** (a -> b) is an instance of Monad b - it behaves like the reader monad *)
 
@@ -269,12 +300,14 @@ implicit module Identity: sig
   include Functor with type 'b t = 'b identity
   include Applicative with type 'b t := 'b t
   include Monad with type 'b t := 'b t
+include Monad_fix with type 'b t := 'b t
 end = struct
   type 'b t = 'b identity
   let fmap f (Identity b) = Identity (f b)
   let return b = Identity b
   let apply (Identity f) (Identity x) = Identity (f x)
   let bind (Identity x) f = f x
+  let mfix f = let f' = (fun x -> runIdentity (f x)) in Identity (fix f')
 end
 
 type 'a pair = Pair of 'a * 'a
