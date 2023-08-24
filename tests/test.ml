@@ -161,3 +161,8 @@ let () =
   assert (append e e = e);
   assert (append {First {Any_Int}} { first = Some 2 } e = { first = Some 2 });
   assert (append {First {Any_Int}} { first = Some 2 } { first = Some 3 } = { first = Some 2 })
+
+  let () =
+  let open Imp.Control in
+  let f = fun x -> Some 5 in
+    assert ((mfix f) = (Some 5))
