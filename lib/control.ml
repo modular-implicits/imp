@@ -104,6 +104,44 @@ end
 
 let traverse {T : Traversable} = T.traverse
 
+type ('a, 'b) either = Left of 'a | Right of 'b
+
+implicit module Either {A : Any} : sig
+  include Functor with type 'a t = (A.t, 'a) either
+  include Applicative with type 'a t := 'a t
+  include Monad with type 'a t := 'a t
+  include Foldable with type 'a t := 'a t
+  include Traversable with type 'a t := 'a t
+end = struct
+  type 'a t = (A.t, 'a) either
+
+  (* Functor *)
+  let fmap f = function
+    | (Left x) -> (Left x)
+    | (Right x) -> (Right (f x))
+
+  (* Applicative *)
+  let return x = Right x
+  let apply f x = match f, x with
+    | (Left e), _ -> (Left e)
+    | (Right f), x -> fmap f x
+
+  (* Monad *)
+  let bind x f = match x with
+    | (Left e) -> (Left e)
+    | (Right v) -> f v
+
+  (* Foldable *)
+  let fold f t acc = match t with
+    | (Left x) -> acc
+    | (Right x) -> f x acc
+
+  (* Traversable *)
+  let traverse (type a) (type b) {F : Applicative} (f : a -> b F.t)  : (A.t, a) either -> ((A.t, b) either) F.t = function
+    | (Left x) -> F.return (Left x)
+    | (Right y) -> F.fmap (fun x -> Right x) (f y)
+end
+
 implicit module Option: sig
   include Functor with type 'a t = 'a option
   include Applicative with type 'a t := 'a t
