@@ -264,6 +264,8 @@ end = struct
 
   (* Monad *)
   let bind g f x = f (g x) x
+
+  let liftM {M : Monad} (f : 'a -> 'b) (m : 'a M.t) : 'b M.t = M.bind m (fun x -> M.return (f x))
 end
 (** (a -> b) is an instance of Monad b - it behaves like the reader monad *)
 
