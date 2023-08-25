@@ -20,9 +20,7 @@ let () =
     assert (None = liftA2 ( + ) x None);
     end
 
-
 let () =
-  let open Imp.Data.Fractional in
   let open Imp.Data.Floating in
   let open Imp.Data.Num in
   let open implicit Imp.Data in
@@ -35,8 +33,6 @@ let () =
     assert ( 0.1 > 6.29 - (y + x));
 end
 
-
-    
 let () =
   begin
     (* Locally bind implicit instance *)
@@ -162,7 +158,7 @@ let () =
   assert (append {First {Any_Int}} { first = Some 2 } e = { first = Some 2 });
   assert (append {First {Any_Int}} { first = Some 2 } { first = Some 3 } = { first = Some 2 })
 
-  let () =
+let () =
   let open Imp.Control in
-  let f = fun x -> Some 5 in
+  let f = fun _ -> Some 5 in
     assert ((mfix f) = (Some 5))

@@ -140,7 +140,7 @@ end = struct
 
   (* Foldable *)
   let fold f t acc = match t with
-    | (Left x) -> acc
+    | (Left _) -> acc
     | (Right x) -> f x acc
 
   (* Traversable *)
@@ -205,6 +205,9 @@ let fix (f : 'a -> 'a) : 'a =
   let rec loop x = let x' = f x in
      if x = x' then x else loop x' in loop (Obj.magic ())
 
+exception Head
+exception Tail
+
 implicit module List : sig
   include Functor with type 'a t = 'a list
   include Applicative with type 'a t := 'a t
@@ -231,8 +234,12 @@ end = struct
   let mzero = []
   let mplus = (@)
 
-  let head (x::_) = x
-  let tail (_::xs) = xs
+  let head = function
+    | (x::_) -> x
+    | [] -> raise Head
+  let tail = function
+    | (_::xs) -> xs
+    | [] -> raise Tail
 
   (* Monad_fix *)
   let rec mfix (f : 'a -> 'a list) : 'a list = match fix (fun x -> f (head x)) with 
