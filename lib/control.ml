@@ -14,39 +14,40 @@ module type Applicative = sig
   val apply : ('a -> 'b) t -> 'a t -> 'b t
 end;;
 
-let return {M : Applicative} = M.return;;
-let apply {M : Applicative} = M.apply;;
+let return {M : Applicative} = M.return
+let apply {M : Applicative} = M.apply
 
-let liftA2 {M : Applicative} (f : 'a -> 'b -> 'c) (x : 'a M.t) (y : 'b M.t) : 'c M.t = M.apply (M.fmap f x) y;;
-let liftA3 {M : Applicative} (f : 'a -> 'b -> 'c -> 'd) (x : 'a M.t) (y : 'b M.t) (z : 'c M.t) : 'd M.t = M.apply (liftA2 {M} f x y) z;;
-
+let liftA2 {M : Applicative} (f : 'a -> 'b -> 'c) (x : 'a M.t) (y : 'b M.t) : 'c M.t
+  = M.apply (M.fmap f x) y
+let liftA3 {M : Applicative} (f : 'a -> 'b -> 'c -> 'd) (x : 'a M.t) (y : 'b M.t) (z : 'c M.t) : 'd M.t
+  = M.apply (liftA2 {M} f x y) z
 
 module type Monad = sig
   include Applicative
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-end;;
-
-let bind {M : Monad} = M.bind;;
+  val (let*) : 'a t -> ('a -> 'b t) -> 'b t
+end
 
 (* Convenience functions *)
 
-let pure {M : Monad} = M.return;;
-let (>>=) {M : Monad} = M.bind;;
+let bind {M : Monad} = M.((let*))
+let (>>=) = bind
+let pure = return
 
 (* Define polymorphic monad functions *)
 
 let join {M : Monad} (x : 'a M.t M.t) =
-  M.bind x (fun x -> x);;
+  bind x (fun x -> x);;
 
 let (>>|) {M : Monad} (m : 'a M.t) (k : 'a -> 'b) =
   bind m (fun x -> return (k x));;
 
 let sequence {M : Monad} (ms : 'a M.t list) =
+  let open M in
   List.fold_right
     (fun m m' ->
-       m  >>= fun x ->
-       m' >>= fun xs ->
-         return (x :: xs))
+      let* x = m in
+      let* xs = m' in
+      return (x :: xs))
     ms
     (return [])
 
@@ -67,7 +68,7 @@ module Monad(M : sig
     M.bind xm (fun x ->
       M.return (f x)))
   (* Monad *)
-  let bind = M.bind
+  let (let*) = M.bind
 end;;
 
 module type Monad_plus = sig
@@ -134,7 +135,7 @@ end = struct
     | (Right f), x -> fmap f x
 
   (* Monad *)
-  let bind x f = match x with
+  let (let*) x f = match x with
     | (Left e) -> (Left e)
     | (Right v) -> f v
 
@@ -172,7 +173,7 @@ end = struct
     | _, _ -> None
 
   (* Monad *)
-  let bind x f = match x with
+  let (let*) x f = match x with
     | None -> None
     | Some x -> f x
 
@@ -228,7 +229,7 @@ end = struct
     List.concat (List.map (fun f -> List.map (fun x -> f x) xs) fs)
 
   (* Monad *)
-  let bind x f = List.concat (List.map f x)
+  let (let*) x f = List.concat (List.map f x)
 
   (* Monad_plus *)
   let mzero = []
@@ -270,8 +271,7 @@ end = struct
   let apply f g x = f x (g x)
 
   (* Monad *)
-  let bind g f x = f (g x) x
-
+  let (let*) g f x = f (g x) x
 end
 (** (a -> b) is an instance of Monad b - it behaves like the reader monad *)
 
@@ -312,7 +312,7 @@ end = struct
   let fmap f (Identity b) = Identity (f b)
   let return b = Identity b
   let apply (Identity f) (Identity x) = Identity (f x)
-  let bind (Identity x) f = f x
+  let (let*) (Identity x) f = f x
   let mfix f = let f' = (fun x -> runIdentity (f x)) in Identity (fix f')
 end
 
@@ -330,5 +330,5 @@ end = struct
   let fmap f (Pair (x, y)) = Pair (f x, f y)
   let return x = Pair (x, x)
   let apply (Pair (f, g)) (Pair (x, y)) = Pair (f x, g y)
-  let bind (Pair (x, y)) f = Pair (fst (f x), snd (f y))
+  let (let*) (Pair (x, y)) f = Pair (fst (f x), snd (f y))
 end

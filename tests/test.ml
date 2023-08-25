@@ -135,7 +135,7 @@ let () =
   let module S = State {Any_String} in
   let test = bind {S} (get {S}) (fun x -> return [x ^ "!"]) in
   assert (runState test "hello" = (["hello!"], "hello"));
-  let (>>) {M: Monad} x y = M.bind x (fun _ -> y) in
+  let (>>) {M: Monad} x y = M.(let* _ = x in y) in
   let test = bind {S} (put {S} "goodbye" >> get {S}) (fun x -> return [x ^ "!"]) in
   assert (runState test "hello" = (["goodbye!"], "goodbye"));
   let test = bind {S} (modify {S} (fun x -> x ^ "!") >> get {S}) (fun x -> return [x ^ "!"]) in
@@ -162,3 +162,10 @@ let () =
   let open Imp.Control in
   let f = fun _ -> Some 5 in
     assert ((mfix f) = (Some 5))
+
+let () = ignore begin
+  let open Imp.Control in
+  let open Option in
+  let* x = Some 3 in
+  return (assert (x = 3))
+end

@@ -30,7 +30,7 @@ end = struct
   let return x = ReaderT (fun _ -> return {M} x)
   let apply (ReaderT ff) (ReaderT fx) = ReaderT (fun r -> apply {M} (ff r) (fx r))
   (* Monad *)
-  let bind (ReaderT fx) ff = ReaderT (fun r -> bind {M} (fx r) (fun a -> runReaderT {M} (ff a) r))
+  let (let*) (ReaderT fx) ff = ReaderT (fun r -> bind {M} (fx r) (fun a -> runReaderT {M} (ff a) r))
   (* MonadReader *)
   type r = R.t
   let asks f = ReaderT (fun r -> M.return (f r))
@@ -50,7 +50,7 @@ end = struct
   let return x = ReaderT (fun _ -> x)
   let apply (ReaderT ff) (ReaderT fx) = ReaderT (fun r -> ff r (fx r))
   (* Monad *)
-  let bind (ReaderT fx) ff = ReaderT (fun r -> runReader (ff (fx r)) r)
+  let (let*) (ReaderT fx) ff = ReaderT (fun r -> runReader (ff (fx r)) r)
   (* MonadReader *)
   type r = R.t
   let asks f = ReaderT f
@@ -83,15 +83,16 @@ end = struct
   (* Applicative *)
   let return x = StateT (fun s -> M.return (x, s))
   let apply (StateT ff) (StateT fx) = StateT (
-    fun s -> M.bind (ff s) @@
-    fun (f, s') -> M.bind (fx s') @@
+    fun s -> bind (ff s) @@
+    fun (f, s') -> bind (fx s') @@
     fun (x, s'') -> M.return (f x, s'')
   )
   (* Monad *)
-  let bind (StateT fx) ff = StateT (
-    fun s -> M.bind (fx s) @@
-    fun (a, s') -> runStateT {M} (ff a) s'
-  )
+  let (let*) (StateT fx) ff = StateT (
+    fun s -> M.(
+      let* (a, s') = fx s in
+      runStateT {M} (ff a) s'
+  ))
   (* MonadState *)
   type s = S.t
   let get = StateT (fun s -> M.return (s, s))
@@ -125,7 +126,7 @@ end = struct
       (f x, s'')
   )
   (* Monad *)
-  let bind (StateT fx) ff = StateT (
+  let (let*) (StateT fx) ff = StateT (
     fun s -> let (a, s') = fx s in
     runState (ff a) s'
   )
