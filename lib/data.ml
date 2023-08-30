@@ -254,6 +254,8 @@ end = struct
 
 end
 
+let recip {M : Fractional} x = M.one /. x
+
 implicit module Bool: sig
   include Eq with type t = bool
   include Ord with type t := t
