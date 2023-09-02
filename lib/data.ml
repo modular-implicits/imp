@@ -400,6 +400,14 @@ end = struct
   let pred = Int64.pred
 end
 
+implicit module OrdPair {X : Ord} {Y : Ord} : Ord with type t = X.t * Y.t = struct
+  type t = X.t * Y.t
+  let compare (a, b) (c, d) =
+    match X.compare a c with
+    | EQ -> Y.compare b d
+    | x -> x
+end
+
 implicit module Nativeint: sig
   include Eq with type t = nativeint
   include Ord with type t := t
