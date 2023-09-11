@@ -45,6 +45,13 @@ implicit module ShowUnit = struct
   let show () = "()"
 end;;
 
+implicit module ShowOption {X: Show} = struct
+  type t = X.t option
+  let show = function
+    | None -> "None"
+    | Some x -> "Some(" ^ X.show x ^ ")"
+end;;
+
 implicit module Show3Tuple {A : Show} {B : Show} {C : Show} = struct
   type t = A.t * B.t * C.t
   let show (a, b, c) = "(" ^ A.show a ^ ", " ^ B.show b ^ ", " ^ C.show c ^ ")"
