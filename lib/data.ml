@@ -441,12 +441,22 @@ end = struct
   let pred = Nativeint.pred
 end
 
-implicit module Unit: Monoid with type t = unit = struct
+implicit module Unit: sig
+  include Monoid with type t = unit
+  include Eq with type t := t
+  include Ord with type t := t
+end = struct
   type t = unit
 
   (* Monoid *)
   let empty = ()
   let append () () = ()
+
+  (* Eq *)
+  let (=) () () = true
+
+  (* Ord *)
+  let compare () () = EQ
 end
 
 type 'b nonEmpty = NonEmpty of 'b * 'b list
