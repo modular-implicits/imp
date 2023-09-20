@@ -22,6 +22,9 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
+          opam-repositories: |
+            default: https://github.com/ocaml/opam-repository.git
+            modular-implicits: https://github.com/modular-implicits/modular-implicits-opam.git#modular-implicits+let_syntax
 
       - name: Build
         run: |
