@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ocaml-compiler: ["ocaml-variants.4.02.1+modular-implicits", "ocaml-variants.4.02.1+modular-implicits-ber"]
+        ocaml-compiler: ["ocaml-variants.4.02.1+modular-implicits", "ocaml-variants.4.02.1+modular-implicits-ber", "ocaml-variants.4.02.1+modular-implicits+let_syntax"]
         os: [ubuntu-latest]
     steps:
 
